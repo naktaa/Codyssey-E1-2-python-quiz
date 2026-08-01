@@ -15,14 +15,14 @@
 
 | ID | 요구사항 | 필수 여부 | 구현 위치 | 검증 방법 | 필요한 증거 | 구현 단계 | 권장 커밋 | 현재 상태 |
 |---|---|---|---|---|---|---:|---|---|
-| ENV-01 | Python 3.10 이상 사용 | 필수 | 개발 환경 | `python3 --version` | 환경 스크린샷 | 1 | `Chore: 프로젝트 초기 파일 구성` | 예정 |
+| ENV-01 | Python 3.10 이상 사용 | 필수 | 개발 환경 | `python3 --version` | 환경 스크린샷 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | ENV-02 | 외부 라이브러리 없이 표준 라이브러리만 사용 | 필수 | 전체 코드 | import 목록과 실행 확인 | 최종 검증 로그 | 13 | `Test: 필수 기능과 데이터 영속성 검증` | 예정 |
 | ENV-03 | macOS zsh에서 최종 재현 | 필수 | 전체 프로젝트 | README 절차로 새 터미널 실행 | 최종 검증 로그 | 16 | `Test: macOS 최종 재현 검증` | 예정 |
-| GIT-01 | GitHub 새 저장소와 로컬 저장소 설정 | 필수 | Git 저장소 | `git remote -v`, GitHub 확인 | 환경 또는 저장소 화면 | 1 | `Chore: 프로젝트 초기 파일 구성` | 예정 |
-| GIT-02 | `.gitignore`, `README.md` 생성 후 첫 commit·push | 필수 | 루트 문서 | `git log -1`, 원격 저장소 | Git 로그 | 1 | `Chore: 프로젝트 초기 파일 구성` | 예정 |
+| GIT-01 | GitHub 새 저장소와 로컬 저장소 설정 | 필수 | Git 저장소 | `git remote -v`, GitHub 확인 | 환경 또는 저장소 화면 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
+| GIT-02 | `.gitignore`, `README.md` 생성 후 첫 commit·push | 필수 | 루트 문서 | `git log -1`, 원격 저장소 | Git 로그 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | GIT-03 | 의미 있는 커밋 10개 이상 | 필수 | Git 이력 | `git rev-list --count HEAD` | Git 그래프 | 14 | 기능 단위 커밋 | 예정 |
 | GIT-04 | main 외 브랜치 생성·작업·병합 1회 이상 | 필수 | `feature/quiz-play` | `git log --graph --all` | Git 그래프 | 5~6 | `Feat: 퀴즈 출제와 결과 출력 구현` | 예정 |
-| GIT-05 | `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone` 각 1회 이상 사용 | 필수 | Git 작업 기록 | 터미널 기록·worklog 확인 | clone·pull 스크린샷 | 1, 5, 15 | 각 단계 커밋 | 예정 |
+| GIT-05 | `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone` 각 1회 이상 사용 | 필수 | Git 작업 기록 | 터미널 기록·worklog 확인 | clone·pull 스크린샷 | 1, 5, 15 | 각 단계 커밋 | 구현 중 |
 | FUNC-01 | 실행 시 메뉴와 종료 기능 제공 | 필수 | `quiz_game.py` | 메뉴 1~5 선택 확인 | 메뉴 스크린샷 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 예정 |
 | FUNC-02 | 메뉴 입력 공백·빈 값·문자·범위 오류 처리 | 필수 | 입력 메서드 | ` 1 `, Enter, `abc`, `9` 입력 | 메뉴 스크린샷·로그 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 예정 |
 | FUNC-03 | 숫자 입력이 필요한 모든 위치에 공통 검증 적용 | 필수 | 공통 입력 메서드 | 메뉴·정답·추가 정답 입력 오류 테스트 | 최종 검증 로그 | 12 | `Fix: 공통 입력 예외 처리 보완` | 예정 |
@@ -56,7 +56,7 @@
 | DOC-03 | README에 실행 방법 포함 | 필수 | `README.md` | 그대로 따라 실행 | 최종 검증 로그 | 14, 16 | `Docs: README와 제출 증거 정리` | 예정 |
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 예정 |
 | DOC-05 | README에 state.json 경로·역할·스키마 포함 | 필수 | `README.md` | 실제 JSON과 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 예정 |
-| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/screenshots/` | Python·Git·VSCode 표시 | `env-python-git.png` | 1 | `Docs: README와 제출 증거 정리` | 예정 |
+| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-02 | 추가·목록·플레이·점수 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 예정 |
 | EVID-03 | 재실행 데이터 유지 화면 확보 | 필수 | `evidence/screenshots/` | 종료 전후 비교 | `persistence-restart.png` | 13 | `Docs: README와 제출 증거 정리` | 예정 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 예정 |

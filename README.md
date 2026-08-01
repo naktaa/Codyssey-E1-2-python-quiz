@@ -1,6 +1,6 @@
 # E1-2 나만의 퀴즈 게임
 
-> 현재 상태: 초기 문서 구성 완료, 프로그램 구현 및 실행 검증 전
+> 현재 상태: 초기 Git 저장소와 첫 push 완료, 프로그램 구현 및 실행 검증 전
 
 ## 프로젝트 개요
 
@@ -17,10 +17,11 @@
 
 - OS: macOS
 - Shell: zsh
-- Python: 3.10 이상
+- Python: 3.12.13 (요구 버전: 3.10 이상)
+- Git: 2.53.0
 - 외부 라이브러리: 사용하지 않음
 
-실제 검증 후 정확한 버전을 기록한다.
+2026-08-01 터미널에서 실제 버전을 확인했다.
 
 ## 실행 방법
 
@@ -104,7 +105,9 @@ python3 main.py
 
 ## Git 작업 계획
 
-- 기본 브랜치: `main`
+- 원격 저장소: <https://github.com/naktaa/Codyssey-E1-2-python-quiz>
+- 기본 브랜치: `main` (`origin/main` 추적)
+- 첫 커밋: `a4887e4 Chore: 프로젝트 초기 파일 구성`
 - 기능 브랜치: `feature/quiz-play`
 - 의미 있는 커밋 10개 이상
 - 실제 브랜치 생성·작업·병합 수행
@@ -113,7 +116,12 @@ python3 main.py
 
 ## 실행 및 제출 증거
 
-실제 검증 후 아래 파일을 추가한다.
+현재 확보한 증거:
+
+- [초기 Git 설정 명령과 결과](evidence/git/git-verification.md)
+- [Python·Git 버전과 첫 커밋 상태](evidence/git/git-log.png)
+
+기능 구현과 실제 검증 후 아래 파일을 추가한다.
 
 - `evidence/screenshots/env-python-git.png`
 - `evidence/screenshots/menu.png`

@@ -74,12 +74,12 @@ class GameManagerMenuTest(unittest.TestCase):
         )
 
     def test_run_returns_to_menu_for_placeholder_and_exits(self) -> None:
-        game_manager, outputs = self.make_game_manager(["2", "5"])
+        game_manager, outputs = self.make_game_manager(["3", "5"])
 
         game_manager.run()
 
         self.assertEqual(outputs.count("=== 상식 퀴즈 게임 ==="), 2)
-        self.assertIn("[퀴즈 추가] 기능은 아직 구현되지 않았습니다.", outputs)
+        self.assertIn("[퀴즈 목록 보기] 기능은 아직 구현되지 않았습니다.", outputs)
         self.assertEqual(outputs[-1], "게임을 종료합니다.")
 
     def test_get_categories_removes_duplicates_and_preserves_order(self) -> None:
@@ -125,6 +125,46 @@ class GameManagerMenuTest(unittest.TestCase):
         self.assertIn("정답 수: 1/2", outputs)
         self.assertIn("점수: 50점", outputs)
         self.assertEqual(game_manager.best_scores, {})
+
+    def test_add_quiz_validates_input_and_adds_to_memory(self) -> None:
+        inputs = [
+            "   ",
+            "문화",
+            "",
+            "대한민국의 수도는 어디인가요?",
+            "",
+            "서울",
+            "부산",
+            "인천",
+            "대전",
+            "abc",
+            "5",
+            "1",
+        ]
+        game_manager, outputs = self.make_game_manager(inputs)
+
+        game_manager.add_quiz()
+
+        self.assertEqual(len(game_manager.quizzes), 1)
+        added_quiz = game_manager.quizzes[0]
+        self.assertEqual(added_quiz.category, "문화")
+        self.assertEqual(added_quiz.question, "대한민국의 수도는 어디인가요?")
+        self.assertEqual(added_quiz.choices, ["서울", "부산", "인천", "대전"])
+        self.assertEqual(added_quiz.answer, 1)
+        self.assertIn("입력값이 비어 있습니다. 내용을 입력해 주세요.", outputs)
+        self.assertIn("숫자만 입력해 주세요.", outputs)
+        self.assertIn("1부터 4 사이의 숫자를 입력해 주세요.", outputs)
+        self.assertEqual(outputs[-1], "퀴즈를 추가했습니다.")
+
+    def test_add_quiz_uses_typed_existing_category_name(self) -> None:
+        quizzes = [self.make_quiz("과학", "기존 문제", 1)]
+        inputs = ["과학", "새 문제", "A", "B", "C", "D", "2"]
+        game_manager, _ = self.make_game_manager(inputs, quizzes)
+
+        game_manager.add_quiz()
+
+        self.assertEqual(len(game_manager.quizzes), 2)
+        self.assertEqual(game_manager.quizzes[-1].category, "과학")
 
 
 if __name__ == "__main__":

@@ -63,6 +63,28 @@ class QuizGame:
 
             self.output("입력값이 비어 있습니다. 내용을 입력해 주세요.")
 
+    def add_quiz(self) -> None:
+        """새 4지선다형 퀴즈를 입력받아 현재 게임의 목록에 추가한다."""
+        self.output("\n=== 퀴즈 추가 ===")
+        # 같은 이름은 기존 카테고리로, 새 이름은 새 카테고리로 사용한다.
+        category = self.read_nonempty("카테고리 이름: ")
+        question = self.read_nonempty("문제: ")
+        choices = [
+            self.read_nonempty(f"선택지 {number}: ")
+            for number in range(1, 5)
+        ]
+        answer = self.read_int("정답 번호(1~4): ", 1, 4)
+
+        self.quizzes.append(
+            Quiz(
+                category=category,
+                question=question,
+                choices=choices,
+                answer=answer,
+            )
+        )
+        self.output("퀴즈를 추가했습니다.")
+
     def get_categories(self) -> list[str]:
         """퀴즈에 처음 등장한 순서대로 중복 없는 카테고리를 반환한다."""
         categories: list[str] = []
@@ -137,6 +159,8 @@ class QuizGame:
 
             if choice == 1:
                 self.play_quizzes()
+            elif choice == 2:
+                self.add_quiz()
             else:
                 self.output(
                     f"[{self.MENU_ITEMS[choice]}] 기능은 아직 구현되지 않았습니다."

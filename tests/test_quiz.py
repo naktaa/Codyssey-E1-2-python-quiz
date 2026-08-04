@@ -89,13 +89,15 @@ class QuizTest(unittest.TestCase):
                 }
             )
 
-    def test_default_quizzes_returns_fresh_empty_lists(self) -> None:
+    def test_default_quizzes_returns_fresh_quiz_lists(self) -> None:
         first = get_default_quizzes()
         second = get_default_quizzes()
 
-        self.assertEqual(first, [])
-        self.assertEqual(second, [])
+        self.assertEqual(len(first), 4)
+        self.assertEqual(len(second), 4)
         self.assertIsNot(first, second)
+        self.assertIsNot(first[0], second[0])
+        self.assertEqual({quiz.category for quiz in first}, {"과학", "역사"})
 
 
 if __name__ == "__main__":

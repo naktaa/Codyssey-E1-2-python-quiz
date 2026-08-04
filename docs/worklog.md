@@ -144,9 +144,60 @@ git status --short
 
 ### Git 상태
 
-- 커밋 메시지: `Docs: 상식 퀴즈 구현 계획 정리`
+- 커밋: `6960262 Docs: 상식 퀴즈 구현 계획 정리`
 - push: 미실시
 
 ### 다음 작업
 
 - 메뉴 1~5와 공통 입력 처리를 담당하는 최소 `QuizGame` 골격을 구현한다.
+
+---
+
+## 2026-08-04 — 메뉴와 공통 입력 처리 구현
+
+- 환경: macOS / zsh / Python 3.12.13 / Git 2.53.0
+- 브랜치: `main`
+- 목표: `src` 소스 구조에서 메뉴 1~5와 이후 기능에 재사용할 입력 검증 구현
+- 요구사항: `FUNC-01`, `FUNC-02`, `TECH-04`, `TECH-05`
+
+### 변경 파일
+
+- `main.py`: `src.game_manager`의 `QuizGame`을 실행하는 진입점 추가
+- `src/__init__.py`: 애플리케이션 코드 패키지 정의
+- `src/game_manager.py`: 메뉴 루프, 숫자 입력과 비어 있지 않은 문자열 입력 구현
+- `tests/test_game_manager.py`: 메뉴·입력·종료 자동 테스트 4개 추가
+- `README.md`: 메뉴와 공통 입력의 검증 상태 반영
+- `docs/requirements.md`: 실제 구현·검증 상태 반영
+- `docs/progress.md`: 현재 단계와 다음 작업 갱신
+- `docs/troubleshooting.md`: 실제 테스트·컴파일 실패와 해결 기록
+
+### 실행 명령과 실제 결과
+
+```zsh
+python3 -m unittest discover -s tests -v
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-pycache python3 -m compileall -q .
+printf '1\n5\n' | python3 main.py
+```
+
+- 결과: 성공
+- 실제 출력 요약: 메뉴와 공통 입력 자동 테스트 4개가 모두 통과했다.
+- 실제 출력 요약: 임시 bytecode 캐시 경로를 사용한 전체 Python 컴파일이
+  출력 없이 성공했다.
+- 실제 출력 요약: 메뉴 1번 선택 시 미구현 안내 후 메뉴로 돌아오고 5번
+  선택 시 traceback 없이 종료했다.
+- 실제 출력 요약: `src.game_manager`에서 `QuizGame`을 import하는 구조로 옮긴
+  뒤에도 자동 테스트 4개와 실제 실행이 동일하게 통과했다.
+
+### 증거
+
+- 새 증거 파일 없음
+- 메뉴 스크린샷은 기능 문구가 확정된 뒤 별도로 확보 예정
+
+### Git 상태
+
+- 권장 커밋 메시지: `Feat: 메뉴와 공통 입력 처리 구현`
+- push: 미실시
+
+### 다음 작업
+
+- `Quiz` 클래스의 데이터 검증, 출력, 정답 확인과 JSON 변환을 구현한다.

@@ -24,7 +24,8 @@ Git 커밋 경계를 기록한다. 실제 구현과 검증 결과가 이 계획�
 main.py
    │
    ▼
-QuizGame
+src/game_manager.py
+└── QuizGame
    ├── Quiz 객체 목록
    ├── 카테고리별 최고 점수
    ├── 메뉴와 공통 입력
@@ -32,13 +33,18 @@ QuizGame
    └── state.json 저장·불러오기
            │
            ├── 정상 데이터
-           └── default_quizzes.py fallback
+           └── src/default_quizzes.py fallback
 ```
+
+애플리케이션 코드는 `src/`, 자동 테스트는 `tests/`에 둔다. `main.py`는
+실행 명령을 단순하게 유지하기 위해 루트에 두고, 최종 `state.json`도 미션
+요구사항에 따라 프로젝트 루트에 둔다.
 
 ### `main.py`
 
 - 프로그램 진입점만 담당한다.
-- `QuizGame` 객체를 생성하고 `run()`을 호출한다.
+- `src.game_manager`의 `QuizGame` 객체를 `game_manager` 변수로 생성하고
+  `run()`을 호출한다.
 
 ### `Quiz`
 

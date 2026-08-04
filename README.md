@@ -1,6 +1,6 @@
 # E1-2 나만의 퀴즈 게임
 
-> 현재 상태: 초기 Git 저장소와 첫 push 완료, 프로그램 구현 및 실행 검증 전
+> 현재 상태: 상식 퀴즈 아키텍처 확정, 프로그램 구현 및 실행 검증 전
 
 ## 프로젝트 개요
 
@@ -8,10 +8,10 @@
 
 ## 퀴즈 주제와 선정 이유
 
-- 퀴즈 주제: **TODO — 구현 전 확정**
-- 선정 이유: **TODO — 본인이 해당 주제를 선택한 구체적인 이유 작성**
+- 퀴즈 주제: **여러 카테고리로 구성된 상식 퀴즈**
+- 선정 이유: **다양한 분야의 지식을 카테고리별로 나누어 학습하고 확인하기 위해 선정**
 
-권장 예시: Python·Git 기초, 임베디드 시스템 기초, 좋아하는 영화·게임 등 직접 5문제 이상 설명할 수 있는 주제
+실제 카테고리와 기본 문제 5개 이상은 사용자가 문제 데이터를 준비한 뒤 반영한다.
 
 ## 개발 환경
 
@@ -80,28 +80,32 @@ python3 main.py
 - 역할: 퀴즈 목록과 최고 점수 저장
 - 현재 상태: 구현 전
 
-권장 스키마:
+확정 스키마:
 
 ```json
 {
   "quizzes": [
     {
+      "category": "과학",
       "question": "문제 내용",
       "choices": ["선택지 1", "선택지 2", "선택지 3", "선택지 4"],
       "answer": 1
     }
   ],
-  "best_score": null
+  "best_scores": {
+    "과학": 80
+  }
 }
 ```
 
 | 필드 | 설명 |
 |---|---|
 | `quizzes` | 퀴즈 객체 목록 |
+| `category` | 퀴즈 카테고리 문자열 |
 | `question` | 문제 문자열 |
 | `choices` | 4개의 선택지 문자열 목록 |
 | `answer` | 1~4 정답 번호 |
-| `best_score` | 아직 미플레이 시 `null`, 이후 최고 점수 |
+| `best_scores` | 카테고리 이름을 키로 사용하는 0~100점 최고 점수 |
 
 ## Git 작업 계획
 
@@ -136,6 +140,7 @@ python3 main.py
 
 ## 요구사항과 진행 기록
 
+- 확정 아키텍처: [`docs/architecture-plan.md`](docs/architecture-plan.md)
 - 전체 요구사항: [`docs/requirements.md`](docs/requirements.md)
 - 현재 진행 상태: [`docs/progress.md`](docs/progress.md)
 - 작업 기록: [`docs/worklog.md`](docs/worklog.md)

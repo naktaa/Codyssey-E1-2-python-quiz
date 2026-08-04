@@ -12,7 +12,7 @@ Git 커밋 경계를 기록한다. 실제 구현과 검증 결과가 이 계획�
 - 플레이할 때 전체 문제를 섞지 않고 한 카테고리를 선택한다.
 - 카테고리 목록은 퀴즈의 `category` 값에서 자동으로 만든다.
 - 최고 점수는 카테고리별 0~100점으로 저장한다.
-- 실제 기본 문제는 사용자가 나중에 제공하며, 그전에는 빈 기본 데이터와
+- 실제 기본 문제는 사용자가 나중에 제공하며, 그전에는 임시 문제 4개와
   테스트 전용 fixture로 구조와 기능을 검증한다.
 - 외부 라이브러리 없이 Python 표준 라이브러리만 사용한다.
 - 랜덤 출제, 힌트, 문제 수 선택, 퀴즈 삭제와 점수 히스토리는 필수 기능
@@ -194,7 +194,7 @@ state_path: Path
    - `Feat: 메뉴와 공통 입력 처리 구현`
 3. `Quiz` 클래스와 카테고리 데이터 구조
    - `Feat: Quiz 클래스와 카테고리 구조 구현`
-4. `feature/quiz-play` 브랜치에서 카테고리별 플레이
+4. `feature/solving` 브랜치에서 카테고리별 플레이
    - `Feat: 카테고리별 퀴즈 플레이 구현`
 5. `main`에 `--no-ff` 병합
 6. 퀴즈 추가
@@ -220,10 +220,10 @@ state_path: Path
 
 ```zsh
 git status --short --branch
-git checkout -b feature/quiz-play
+git checkout -b feature/solving
 # 기능 구현, 검증과 커밋
 git checkout main
-git merge --no-ff feature/quiz-play
+git merge --no-ff feature/solving
 git log --oneline --graph --decorate --all
 ```
 

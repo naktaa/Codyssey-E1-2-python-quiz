@@ -245,4 +245,63 @@ python --version
 
 ### 다음 작업
 
-- Python 3.12.13 자동 테스트 통과 후 `feature/quiz-play` 브랜치를 생성한다.
+- Python 3.12.13 자동 테스트 통과 후 `feature/solving` 브랜치를 생성한다.
+
+---
+
+## 2026-08-04 — feature/solving 브랜치와 카테고리별 퀴즈 플레이
+
+- 환경: macOS / zsh / Python 3.12.13 사용자 환경
+- 브랜치: `feature/solving`
+- 목표: 선택한 카테고리의 문제를 순서대로 출제하고 결과 점수를 출력
+- 요구사항: `GIT-04`, `GIT-05`, `DATA-01`, `FUNC-05`, `FUNC-06`, `FUNC-07`, `FUNC-08`
+
+### 브랜치 생성 명령과 실제 결과
+
+```zsh
+git checkout -b feature/solving
+git branch
+```
+
+- 결과: 성공
+- 실제 출력 요약: 새 `feature/solving` 브랜치를 생성하고 해당 브랜치로
+  전환했다.
+- 실제 출력 요약: `git branch`에서 `feature/solving`이 현재 브랜치로
+  표시되는 것을 다시 확인했다.
+
+### 변경 파일
+
+- `src/game_manager.py`: 카테고리 추출·선택, 순차 출제, 정오답과 결과 출력 구현
+- `main.py`: 기본 퀴즈를 생성해 `QuizGame`에 전달하도록 연결
+- `src/default_quizzes.py`: 과학·역사 플레이 확인용 임시 문제 4개 추가
+- `tests/test_game_manager.py`: 카테고리 중복 제거, 빈 목록과 선택 출제 테스트 추가
+- `tests/test_quiz.py`: 임시 기본 데이터가 새 객체 목록을 반환하는지 검증
+- `README.md`: 플레이 구현 상태와 실제 기능 브랜치명 반영
+- `docs/architecture-plan.md`: 브랜치 생성·병합 명령을 `feature/solving`으로 변경
+- `docs/requirements.md`: 브랜치와 플레이 요구사항 구현 상태 반영
+- `docs/progress.md`: 현재 브랜치, 구현 범위와 다음 검증 작업 반영
+
+### 실행 명령과 실제 결과
+
+```zsh
+git diff --check
+```
+
+- 결과: 성공
+- 실제 출력 요약: 공백 오류 없이 통과했다.
+- 확인 필요: 사용자 Python 3.12.13 환경에서 전체 `unittest` 실행
+
+### 증거
+
+- 브랜치 생성 터미널 로그를 작업 기록에 반영
+- 실제 문제를 추가한 뒤 `evidence/screenshots/play-result.png` 확보 예정
+
+### Git 상태
+
+- 권장 커밋 메시지: `Feat: 카테고리별 퀴즈 플레이 구현`
+- push: 미실시
+- `main` 병합: 미실시
+
+### 다음 작업
+
+- Python 3.12.13 자동 테스트와 직접 플레이 흐름을 확인한다.

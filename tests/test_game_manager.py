@@ -1,6 +1,7 @@
 import unittest
 
 from src.game_manager import QuizGame
+from src.quiz import Quiz
 
 
 class InputFeeder:
@@ -14,14 +15,33 @@ class InputFeeder:
 
 
 class GameManagerMenuTest(unittest.TestCase):
-    def make_game_manager(self, inputs: list[str]) -> tuple[QuizGame, list[str]]:
+    def make_game_manager(
+        self,
+        inputs: list[str],
+        quizzes: list[Quiz] | None = None,
+    ) -> tuple[QuizGame, list[str]]:
         """입력과 출력을 관찰할 수 있는 게임 관리자를 만든다."""
         outputs: list[str] = []
         game_manager = QuizGame(
+            quizzes=quizzes,
             input_func=InputFeeder(inputs),
             output_func=outputs.append,
         )
         return game_manager, outputs
+
+    def make_quiz(
+        self,
+        category: str,
+        question: str,
+        answer: int,
+    ) -> Quiz:
+        """플레이 흐름을 검증할 간단한 퀴즈를 만든다."""
+        return Quiz(
+            category=category,
+            question=question,
+            choices=["A", "B", "C", "D"],
+            answer=answer,
+        )
 
     def test_show_menu_displays_all_items(self) -> None:
         game_manager, outputs = self.make_game_manager([])
@@ -54,13 +74,57 @@ class GameManagerMenuTest(unittest.TestCase):
         )
 
     def test_run_returns_to_menu_for_placeholder_and_exits(self) -> None:
-        game_manager, outputs = self.make_game_manager(["1", "5"])
+        game_manager, outputs = self.make_game_manager(["2", "5"])
 
         game_manager.run()
 
         self.assertEqual(outputs.count("=== 상식 퀴즈 게임 ==="), 2)
-        self.assertIn("[퀴즈 풀기] 기능은 아직 구현되지 않았습니다.", outputs)
+        self.assertIn("[퀴즈 추가] 기능은 아직 구현되지 않았습니다.", outputs)
         self.assertEqual(outputs[-1], "게임을 종료합니다.")
+
+    def test_get_categories_removes_duplicates_and_preserves_order(self) -> None:
+        quizzes = [
+            self.make_quiz("과학", "과학 문제 1", 1),
+            self.make_quiz("역사", "역사 문제", 2),
+            self.make_quiz("과학", "과학 문제 2", 3),
+        ]
+        game_manager, _ = self.make_game_manager([], quizzes)
+
+        self.assertEqual(game_manager.get_categories(), ["과학", "역사"])
+
+    def test_play_quizzes_handles_empty_quiz_list(self) -> None:
+        game_manager, outputs = self.make_game_manager([])
+
+        score = game_manager.play_quizzes()
+
+        self.assertIsNone(score)
+        self.assertEqual(outputs, ["등록된 퀴즈가 없습니다."])
+
+    def test_play_quizzes_uses_selected_category_in_saved_order(self) -> None:
+        quizzes = [
+            self.make_quiz("과학", "첫 번째 과학 문제", 2),
+            self.make_quiz("역사", "출제되면 안 되는 역사 문제", 1),
+            self.make_quiz("과학", "두 번째 과학 문제", 4),
+        ]
+        game_manager, outputs = self.make_game_manager(
+            ["1", "2", "3"],
+            quizzes,
+        )
+
+        score = game_manager.play_quizzes()
+
+        output_text = "\n".join(outputs)
+        self.assertEqual(score, 50)
+        self.assertLess(
+            output_text.index("첫 번째 과학 문제"),
+            output_text.index("두 번째 과학 문제"),
+        )
+        self.assertNotIn("출제되면 안 되는 역사 문제", output_text)
+        self.assertIn("정답입니다!", outputs)
+        self.assertIn("오답입니다. 정답은 4번 D입니다.", outputs)
+        self.assertIn("정답 수: 1/2", outputs)
+        self.assertIn("점수: 50점", outputs)
+        self.assertEqual(game_manager.best_scores, {})
 
 
 if __name__ == "__main__":

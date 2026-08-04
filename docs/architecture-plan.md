@@ -235,8 +235,8 @@ git log --oneline --graph --decorate --all
 ### 자동 검증
 
 ```zsh
-python3 -m unittest discover -s tests -v
-python3 -m compileall -q .
+python -m unittest discover -s tests -v
+python -m compileall -q .
 git diff --check
 ```
 

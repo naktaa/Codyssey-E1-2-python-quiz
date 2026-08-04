@@ -1,5 +1,7 @@
 from collections.abc import Callable
 
+from .quiz import Quiz
+
 
 class QuizGame:
     """터미널 퀴즈 게임의 메뉴와 공통 입력을 관리한다."""
@@ -17,7 +19,7 @@ class QuizGame:
         input_func: Callable[[str], str] = input,
         output_func: Callable[[str], None] = print,
     ) -> None:
-        self.quizzes: list[object] = []
+        self.quizzes: list[Quiz] = []
         self.best_scores: dict[str, int] = {}
 
         # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.

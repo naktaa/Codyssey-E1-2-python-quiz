@@ -298,9 +298,9 @@ git diff --check
 
 ### Git 상태
 
-- 권장 커밋 메시지: `Feat: 카테고리별 퀴즈 플레이 구현`
-- push: 미실시
-- `main` 병합: 미실시
+- 커밋: `65312c4 Feat: 퀴즈 풀기 기능 기본 구현`
+- push: `origin/feature/solving`에 완료
+- `main` 병합: `cb4f9cb Merge: 퀴즈 플레이 브랜치 병합`
 
 ### 다음 작업
 
@@ -336,7 +336,8 @@ git diff --check
 - 정답 번호 `6`에 범위 오류가 출력되고 `1`을 다시 입력해 등록을 완료했다.
 - 종료 후 재실행했을 때 기본 과학 문제 2개만 출제되어 추가 문제가
   메모리와 함께 사라지는 것을 확인했다.
-- 같은 실행 내 추가 문제 플레이와 빈 문자열 재입력은 아직 미검증이다.
+- 빈 카테고리·문제·선택지 재입력은 자동 테스트로 확인했다.
+- 같은 실행 내 추가 문제 플레이는 후속 상태 점검에서 확인했다.
 
 ### 증거
 
@@ -345,5 +346,60 @@ git diff --check
 
 ### Git 상태
 
-- 커밋·push: 미실시
-- 권장 커밋 메시지: `Feat: 메모리 기반 퀴즈 추가 구현`
+- 커밋: `b78bcc1 Feat: 퀴즈 추가 기능 구현`
+- push: `origin/main`에 완료
+
+---
+
+## 2026-08-04 — 현재 구현·문서 상태 점검
+
+- 환경: macOS / zsh / Python 3.12.13 / Git 2.53.0
+- 브랜치: `main`
+- 목표: 오늘까지의 코드·실행·Git·증거 상태를 대조하고 진행 문서를 최신화
+- 요구사항: `ENV-02`, `GIT-03`, `GIT-04`, `FUNC-03`, `FUNC-05`~`FUNC-10`, `TECH-01`~`TECH-04`
+
+### 실행 명령과 실제 결과
+
+```zsh
+git status --short --branch
+git rev-list --count HEAD
+git log --oneline --graph --decorate --all -20
+PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-audit-pycache python -m unittest discover -s tests -v
+PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-audit-pycache python -m compileall -q .
+git diff --check
+printf '2\n문화\n대한민국의 수도는?\n서울\n부산\n인천\n대전\n1\n1\n3\n1\n5\n' | python main.py
+python main.py < /dev/null
+```
+
+- 자동 테스트 17개가 모두 통과했다.
+- 전체 Python 파일 컴파일과 `git diff --check`가 출력 없이 통과했다.
+- 새 문화 퀴즈를 추가한 뒤 같은 실행에서 해당 카테고리를 선택해 100점으로
+  플레이하고 정상 종료했다.
+- `main`의 커밋 수는 13개이고 `feature/solving` 병합 커밋의 두 부모와
+  분기·병합 그래프를 확인했다.
+- 표준 라이브러리 외 import가 없음을 확인했다.
+- 빈 입력 스트림으로 실행하면 `EOFError` traceback과 종료 코드 1이 발생했다.
+  안전 종료는 미해결 필수 요구사항으로 유지한다.
+
+### 문서 변경
+
+- `README.md`: 현재 기능·검증·Git·증거 상태와 실행 환경 주의사항 반영
+- `docs/requirements.md`: 실제 구현·실행 검증 상태 반영
+- `docs/progress.md`: 현재 Git 상태, 완료 작업, 다음 작업과 차단 요소 갱신
+- `docs/worklog.md`: 완료된 커밋·병합·push와 상태 점검 결과 기록
+
+### 증거
+
+- 새 증거 파일 없음
+- 기존 예비 PNG의 계정명·호스트명 노출을 최종 재촬영 대상으로 확인
+
+### Git 상태
+
+- 점검 시작 전: `main`과 로컬 `origin/main`이 `b78bcc1`에서 같고 작업 트리 깨끗함
+- 현재 변경: 진행 기록 Markdown 파일만 수정
+- commit·push: 사용자 요청이 없어 미실시
+- 권장 커밋 메시지: `Docs: 현재 구현 및 검증 상태 갱신`
+
+### 다음 작업
+
+- 메뉴 3번의 퀴즈 목록 보기와 빈 목록 안내를 구현한다.

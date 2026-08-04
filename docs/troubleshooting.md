@@ -54,7 +54,7 @@ python3 -m unittest discover -s tests -v
 
 - 재검증 결과: 성공, 테스트 4개 통과
 - 관련 변경 파일: `src/game_manager.py`, `tests/test_game_manager.py`
-- 관련 커밋: 미커밋
+- 관련 커밋: `3b3914c`
 - 재발 방지: 출력 함수에 전달되는 한 항목이 한 줄의 의미만 갖도록 구성한다.
 
 ---
@@ -83,6 +83,6 @@ env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-pycache python3 -m compileall
 
 - 재검증 결과: 성공, 출력 없이 종료 코드 0
 - 관련 변경 파일: 없음
-- 관련 커밋: 미커밋
+- 관련 커밋: 해당 없음
 - 재발 방지: 현재 검증 환경에서 `compileall` 실행 시 동일한 임시 캐시 경로를
   사용한다.

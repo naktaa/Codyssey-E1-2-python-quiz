@@ -190,14 +190,59 @@ printf '1\n5\n' | python3 main.py
 
 ### 증거
 
-- 새 증거 파일 없음
-- 메뉴 스크린샷은 기능 문구가 확정된 뒤 별도로 확보 예정
+- `evidence/screenshots/menu-test.png`: 메뉴·오류 입력·정상 종료 예비 화면
+- 화면에 로컬 계정명과 호스트명이 표시되어 최종 제출용으로는 재촬영 필요
 
 ### Git 상태
 
-- 권장 커밋 메시지: `Feat: 메뉴와 공통 입력 처리 구현`
-- push: 미실시
+- 커밋: `3b3914c Feat: 메뉴와 공통 입력 처리 구현`
+- 주석 보완: `442d924 Docs: 게임 매니저 코드 설명 보완`
+- 예비 화면: `8f954a2 Feat: 메뉴와 공통 입력 처리 구현`
+- push: `origin/main`에 완료
 
 ### 다음 작업
 
 - `Quiz` 클래스의 데이터 검증, 출력, 정답 확인과 JSON 변환을 구현한다.
+
+---
+
+## 2026-08-04 — Quiz 클래스와 빈 기본 데이터 구조 구현
+
+- 환경: macOS / zsh / Python 3.12.13 사용자 확인
+- 브랜치: `main`
+- 목표: 퀴즈 한 문제의 형식과 JSON 변환 책임을 `Quiz` 클래스로 분리
+- 요구사항: `TECH-01`, `TECH-02`, `TECH-03`, `DATA-01`
+
+### 변경 파일
+
+- `src/quiz.py`: 데이터 클래스, 생성 검증, 출력, 정답 확인과 딕셔너리 변환 구현
+- `src/default_quizzes.py`: 실제 문제 반영 전 사용할 새로운 빈 목록 제공
+- `src/game_manager.py`: 퀴즈 목록 타입을 `list[Quiz]`로 구체화
+- `tests/test_quiz.py`: 정상·오류 데이터와 변환 동작 테스트 8개 작성
+- `README.md`, `docs/architecture-plan.md`: 실행 명령을 Python 3.12.13의
+  `python` 기준으로 정리
+
+### 실행 명령과 실제 결과
+
+```zsh
+python --version
+```
+
+- 결과: 성공
+- 실제 출력: `Python 3.12.13`
+- 확인 필요: 최종 코드의 `python -m unittest discover -s tests -v` 결과는
+  사용자 터미널에서 확인 후 실행 검증 완료로 변경한다.
+
+### 증거
+
+- 새 스크린샷 없음
+- Quiz 데이터 모델은 최종 자동 검증 로그로 증명 예정
+
+### Git 상태
+
+- 커밋: `6e55f31 Feat: 퀴즈 클래스 기본 구현`
+- push: `origin/main`에 완료
+
+### 다음 작업
+
+- Python 3.12.13 자동 테스트 통과 후 `feature/quiz-play` 브랜치를 생성한다.

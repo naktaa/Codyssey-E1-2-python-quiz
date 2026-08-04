@@ -19,6 +19,8 @@ class QuizGame:
     ) -> None:
         self.quizzes: list[object] = []
         self.best_scores: dict[str, int] = {}
+
+        # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.
         self.input = input_func
         self.output = output_func
 
@@ -58,6 +60,7 @@ class QuizGame:
             self.output("입력값이 비어 있습니다. 내용을 입력해 주세요.")
 
     def run(self) -> None:
+        """종료 메뉴를 선택할 때까지 메인 메뉴를 반복 실행한다."""
         while True:
             self.show_menu()
             choice = self.read_int("메뉴를 선택하세요: ", 1, 5)

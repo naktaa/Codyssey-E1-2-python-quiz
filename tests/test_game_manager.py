@@ -4,6 +4,8 @@ from src.game_manager import QuizGame
 
 
 class InputFeeder:
+    """준비된 값을 순서대로 반환해 테스트에서 키보드 입력을 대신한다."""
+
     def __init__(self, values: list[str]) -> None:
         self._values = iter(values)
 
@@ -13,6 +15,7 @@ class InputFeeder:
 
 class GameManagerMenuTest(unittest.TestCase):
     def make_game_manager(self, inputs: list[str]) -> tuple[QuizGame, list[str]]:
+        """입력과 출력을 관찰할 수 있는 게임 관리자를 만든다."""
         outputs: list[str] = []
         game_manager = QuizGame(
             input_func=InputFeeder(inputs),

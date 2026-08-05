@@ -49,7 +49,7 @@ class QuizGame:
         self.state_path = state_path or get_state_path()
         self._state_save_enabled = True
 
-        # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.
+        # 입력과 출력을 주입할 수 있게 해 게임 흐름과 터미널을 분리한다.
         self.input = input_func
         self.output = output_func
 

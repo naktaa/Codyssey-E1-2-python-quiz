@@ -36,15 +36,17 @@ src/game_manager.py
            └── src/default_quizzes.py fallback
 ```
 
-애플리케이션 코드는 `src/`, 자동 테스트는 `tests/`에 둔다. `main.py`는
-실행 명령을 단순하게 유지하기 위해 루트에 두고, 최종 `state.json`도 미션
-요구사항에 따라 프로젝트 루트에 둔다.
+애플리케이션 코드는 `src/`에 둔다. 기존 `tests/`는 과거 개발 기록으로만
+유지하며 2026-08-05 이후 실행하거나 수정하지 않는다. `main.py`는 실행 명령을
+단순하게 유지하기 위해 루트에 두고, 최종 `state.json`도 미션 요구사항에 따라
+프로젝트 루트에 둔다.
 
 ### `main.py`
 
 - 프로그램 진입점만 담당한다.
-- `src.game_manager`의 `QuizGame` 객체를 `game_manager` 변수로 생성하고
-  `run()`을 호출한다.
+- `get_state_path()`로 실제·확인용 상태 경로를 선택한다.
+- 확인용 모드이면 사용할 파일을 안내한다.
+- `QuizGame` 객체를 만들고 `load_state()` 후 `run()`을 호출한다.
 
 ### `Quiz`
 
@@ -95,10 +97,14 @@ state_path: Path
 - `show_best_scores()`
 - `load_state()`
 - `save_state()`
+- `validate_state_data()`
+- `backup_corrupted_state()`
+- `recover_corrupted_state()`
 - `safe_exit()`
 
-테스트에서 실제 프로젝트의 `state.json`과 터미널을 사용하지 않도록 저장
-경로, 입력 함수와 출력 함수를 선택적으로 주입할 수 있게 한다.
+게임 로직은 저장 경로, 입력 함수와 출력 함수를 선택적으로 주입할 수 있다.
+현재 직접 기능 확인은 `QUIZ_STATE_MODE=test`로 `state.test.json`을 선택해 실제
+`state.json`과 분리한다.
 
 ## 메뉴와 기능 흐름
 
@@ -127,8 +133,9 @@ state_path: Path
 - 기존 이름과 같으면 같은 카테고리로 묶고 새 이름이면 새 카테고리를 만든다.
 - 문제, 선택지 4개와 정답 번호를 입력받는다.
 - 모든 값이 정상일 때만 `Quiz`를 목록에 추가한다.
-- 현재 등록 단계에서는 실행 중인 메모리 목록에 추가해 기능을 먼저 검증한다.
-- 파일 입출력 단계가 연결되면 정상 추가 직후 `state.json`에도 저장한다.
+- 정상 추가 직후 활성 상태 파일에 저장한다.
+- 환경 변수 미지정 또는 `real` 모드에서는 `state.json`, `test` 모드에서는
+  `state.test.json`을 사용한다.
 - 입력 도중 중단되면 불완전한 퀴즈를 저장하지 않는다.
 
 ### 퀴즈 목록
@@ -175,6 +182,8 @@ state_path: Path
 ```
 
 - 프로젝트 루트를 기준으로 경로를 계산한다.
+- 기본값과 `QUIZ_STATE_MODE=real`은 `state.json`, `QUIZ_STATE_MODE=test`는
+  Git에서 제외한 `state.test.json`을 사용한다.
 - UTF-8, `ensure_ascii=False`, 들여쓰기 2칸으로 저장한다.
 - 임시 파일을 먼저 작성한 뒤 교체하여 부분 저장을 방지한다.
 - 파일이 없으면 기본 퀴즈와 빈 최고 점수로 시작한다.
@@ -184,10 +193,22 @@ state_path: Path
 - 읽기·쓰기 오류는 `try/except`로 처리하고 사용자에게 안내한다.
 - 손상 파일 백업은 Git에 실수로 추가되지 않도록 제외한다.
 
+### 오류 원인 메시지
+
+- `validate_state_data()`는 최상위 객체, `quizzes`, `best_scores`와 점수 형식에
+  대해 코드에 정의된 `ValueError` 메시지를 발생시킨다.
+- `Quiz.from_dict()`와 `Quiz.__post_init__()`은 개별 퀴즈의 필수 필드,
+  문자열·선택지·정답 형식 오류 메시지를 담당한다.
+- `load_state()`는 위 오류를 잡아 `상태 파일이 손상되었습니다: {오류}` 형식으로
+  출력한 뒤 복구를 시작한다.
+- JSON 문법 오류의 세부 내용은 표준 라이브러리 `json`의
+  `JSONDecodeError`, 파일 입출력 오류 내용은 `OSError.strerror`에서 가져온다.
+
 ## 단계별 구현과 Git 커밋
 
-각 단계는 관련 자동 테스트와 수동 검증을 통과한 뒤 커밋한다. 한 번에 한
-단계만 진행하며 push는 별도 요청 전까지 수행하지 않는다.
+각 단계는 사용자 직접 실행과 필요한 증거를 확인한 뒤 커밋한다. 한 번에 한
+단계만 진행하며 push는 별도 요청 전까지 수행하지 않는다. unittest는 더 이상
+실행하거나 수정하지 않는다.
 
 1. 계획 문서 저장
    - `Docs: 상식 퀴즈 구현 계획 정리`
@@ -210,8 +231,8 @@ state_path: Path
     - `Feat: state.json 저장과 불러오기 구현`
 11. 통합 예외와 안전 종료
     - `Fix: 입력 중단과 손상 데이터 복구 처리`
-12. 통합 테스트와 영속성 검증
-    - `Test: 필수 기능과 데이터 영속성 검증`
+12. 직접 실행과 영속성 검증
+    - `Docs: 필수 기능과 데이터 영속성 검증 기록`
 13. 사용자가 제공한 상식 퀴즈 5개 이상 반영
     - `Feat: 상식 퀴즈 기본 데이터 추가`
 14. README와 제출 증거 정리
@@ -233,29 +254,7 @@ git log --oneline --graph --decorate --all
 
 ## 검증 계획
 
-### 자동 검증
-
-```zsh
-python -m unittest discover -s tests -v
-python -m compileall -q .
-git diff --check
-```
-
-테스트 항목:
-
-- `Quiz` 정상·비정상 생성과 JSON 변환
-- 공백, 빈 입력, 문자와 범위 밖 숫자 재입력
-- 카테고리 자동 생성과 중복 처리
-- 선택한 카테고리의 문제만 순서대로 출제
-- 0점, 부분 점수와 100점 계산
-- 낮거나 같은 점수에서 최고 점수를 갱신하지 않음
-- 퀴즈 추가 직후 저장
-- 빈 목록과 아직 플레이하지 않은 점수 처리
-- 파일 없음, 정상 JSON, 손상된 JSON 처리
-- 한글 데이터와 재실행 영속성
-- Ctrl+C와 EOF 안전 종료
-
-### 수동 검증과 증거
+### 사용자 직접 실행과 증거
 
 - 메뉴 1~5와 잘못된 입력
 - 기존·신규 카테고리 퀴즈 추가
@@ -266,3 +265,13 @@ git diff --check
 - Git 브랜치 분기와 `--no-ff` 병합 그래프
 
 검증된 터미널 결과와 화면만 `evidence/`에 저장한다.
+
+### 문서·정적 확인
+
+- `git status --short --branch`로 브랜치와 변경 파일 확인
+- `git log --oneline --graph --decorate --all`로 실제 Git 이력 확인
+- `git diff --check`로 문서와 코드의 공백 오류 확인
+- import 목록으로 Python 표준 라이브러리만 사용하는지 확인
+
+정적 확인은 실행 기능의 정상 증거를 대신하지 않는다. 기능 완료 표시는 사용자가
+`main.py`를 직접 실행한 원본 로그나 캡처와 연결한다.

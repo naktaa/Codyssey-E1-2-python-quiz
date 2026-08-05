@@ -1,98 +1,117 @@
 # E1-2 나만의 퀴즈 게임
 
-> 현재 상태: 카테고리별 플레이·목록·최고 점수와 안전 종료 검증 완료
+> 현재 상태: `state-json` 브랜치에서 JSON 저장·불러오기, 실행 모드 분리,
+> 손상 파일 백업·복구까지 구현했다. 손상 복구는 사용자 직접 실행으로 확인했고,
+> 정상 데이터의 종료·재실행 영속성 증거와 `main` 병합은 아직 남아 있다.
 
 ## 프로젝트 개요
 
-터미널 메뉴에서 퀴즈 풀기, 퀴즈 추가, 목록 확인, 최고 점수 확인을 수행하는
-Python 콘솔 프로그램을 구현한다. 현재는 퀴즈 풀기와 메모리 기반 추가까지
-완료했으며, `state.json` 영속성은 다음 단계에서 구현한다.
+터미널 메뉴에서 카테고리별 퀴즈를 풀고, 새 문제를 추가하고, 문제 목록과
+최고 점수를 확인하는 Python 콘솔 프로그램이다. 퀴즈와 카테고리별 최고 점수는
+프로젝트 루트의 JSON 파일에 저장한다.
 
 ## 퀴즈 주제와 선정 이유
 
-- 퀴즈 주제: **여러 카테고리로 구성된 상식 퀴즈**
-- 선정 이유: **다양한 분야의 지식을 카테고리별로 나누어 학습하고 확인하기 위해 선정**
+- 주제: 여러 카테고리로 구성된 상식 퀴즈
+- 선정 이유: 다양한 분야의 지식을 카테고리별로 나누어 학습하고 확인하기 위함
+- 현재 데이터: 기능 확인용 과학·역사 문제 4개
+- 최종 데이터: 직접 작성한 기본 문제 5개 이상으로 보완 필요
 
-현재는 플레이 확인용 과학·역사 임시 문제 4개를 사용한다. 최종 카테고리와
-기본 문제 5개 이상은 사용자가 문제 데이터를 준비한 뒤 교체한다.
+## 개발 환경과 실행 방법
 
-## 개발 환경
+- macOS / zsh
+- Python 3.12.13 (요구 버전 3.10 이상)
+- Git 2.53.0
+- 외부 라이브러리 없음
 
-- OS: macOS
-- Shell: zsh
-- Python: 3.12.13 (요구 버전: 3.10 이상)
-- Git: 2.53.0
-- 외부 라이브러리: 사용하지 않음
-
-2026-08-04 터미널에서 Python 3.12.13 자동 테스트 17개와 전체 컴파일을
-다시 확인했다.
-
-## 실행 방법
-
-프로젝트 루트에서 Python 3.10 이상인지 확인한 뒤 실행한다.
+실제 게임 데이터인 `state.json`을 사용한다.
 
 ```zsh
 python --version
 python main.py
 ```
 
-현재 zsh의 `python` 별칭이 Python 3.12.13을 가리키는 환경에서 검증했다.
-시스템 `/usr/bin/python3`는 3.9이므로 이 프로젝트 실행에 사용하지 않는다.
+사용자 환경에서는 `py` 명령으로도 `main.py`가 실행되도록 설정되어 있다.
 
-## 기능 목록
+직접 기능을 확인하면서 실제 게임 데이터를 바꾸고 싶지 않을 때는 다음처럼
+환경 변수로 확인용 상태 파일을 선택한다.
 
-| 기능 | 설명 | 상태 |
-|---|---|---|
-| 메뉴 | 기능 번호 선택 및 종료 | 실행 검증 완료 |
-| 공통 입력 검증 | 공백, 빈 입력, 문자, 범위 오류 처리 | 실행 검증 완료 |
-| Quiz 데이터 모델 | 퀴즈 검증·출력·정답 확인·딕셔너리 변환 | 구현 완료 |
-| 임시 기본 데이터 | 과학·역사 카테고리의 플레이 확인용 문제 4개 | 구현 중 |
-| 퀴즈 풀기 | 카테고리 선택, 순차 출제, 정오답과 결과 출력 | 구현 완료 |
-| 퀴즈 추가 | 현재 실행 목록에 등록하고 같은 실행에서 바로 플레이 | 실행 검증 완료 |
-| 퀴즈 목록 | 카테고리별 문제와 가로형 선택지 출력 | 증거 확보 완료 |
-| 최고 점수 | 카테고리별 플레이 결과 비교·갱신·조회 | 증거 확보 완료 |
-| 데이터 저장 | `state.json`에 퀴즈와 점수 저장 | 예정 |
-| 데이터 복구 | 파일 없음·손상·입출력 오류 처리 | 예정 |
-| 안전 종료 | Ctrl+C, EOF 발생 시 traceback 없이 종료 | 실행 검증 완료 |
-
-## 계획된 파일 구조
-
-```text
-.
-├── main.py                     # 프로그램 진입점
-├── src/                        # 애플리케이션 소스 코드
-│   ├── __init__.py
-│   ├── game_manager.py         # QuizGame 클래스와 게임 흐름
-│   ├── quiz.py                 # Quiz 클래스
-│   └── default_quizzes.py      # 임시 문제 4개, 최종 기본 퀴즈 5개 이상
-├── tests/                      # 표준 라이브러리 unittest
-├── state.json                  # 퀴즈와 최고 점수 저장
-├── README.md
-├── AGENTS.md
-├── MISSION.md
-├── .gitignore
-├── .gitattributes
-├── docs/
-│   ├── requirements.md
-│   ├── progress.md
-│   ├── worklog.md
-│   └── troubleshooting.md
-└── evidence/
-    ├── screenshots/
-    └── logs/
+```zsh
+QUIZ_STATE_MODE=test py
 ```
 
-`main.py`와 `state.json`은 미션 실행·저장 기준에 맞춰 루트에 두고, 기능
-코드는 `src/`, 자동 테스트는 `tests/`에서 관리한다.
+이 모드는 `[테스트 모드] state.test.json을 사용합니다.`를 먼저 출력하고
+프로젝트 루트의 `state.test.json`만 읽고 쓴다. 이 파일과 복구 과정에서 생기는
+`*.corrupt-*` 파일은 `.gitignore`에 포함되어 기능 확인 중의 데이터 변경이
+커밋에 들어가지 않는다. 환경 변수를 지정하지 않거나 `real`로 지정하면
+`state.json`을 사용한다.
 
-## 데이터 파일 설명
+### 검증 원칙
 
-- 경로: 프로젝트 루트의 `state.json`
-- 인코딩: UTF-8
-- 역할: 퀴즈 목록과 최고 점수 저장
-- 현재 상태: 구현 전
+2026-08-05 이후에는 `unittest`를 실행하거나 수정하지 않는다. `tests/`는 이전
+개발 과정의 기록으로만 남겨 두며 현재 기능의 정상 근거로 사용하지 않는다.
+앞으로의 기능 검증은 사용자가 `main.py`를 직접 실행한 원본 로그나 캡처로
+확인한다. 과거 작업 기록에 적힌 unittest 결과는 당시 수행 사실을 보존한
+것이며 현재 JSON 구현의 검증 결과를 뜻하지 않는다.
 
-확정 스키마:
+## 기능과 현재 상태
+
+| 기능 | 구현 내용 | 현재 상태 |
+|---|---|---|
+| 메뉴·공통 입력 | 메뉴 1~5, 빈 값·문자·범위 밖 숫자 재입력 | 직접 실행 확인 |
+| 퀴즈 풀기 | 카테고리 선택, 순차 출제, 정오답·환산 점수 출력 | 직접 실행 확인 |
+| 퀴즈 추가 | 카테고리·문제·선택지 4개·정답 입력 후 즉시 저장 | 구현 완료, JSON 저장 화면 증거 필요 |
+| 퀴즈 목록 | 카테고리별 문제와 가로형 선택지, 문제 사이 빈 줄 | 캡처 확보 |
+| 최고 점수 | 카테고리별 0~100점 비교·갱신·즉시 저장 | 메모리 동작 로그 확보, 재실행 증거 필요 |
+| JSON 불러오기 | 정상 데이터를 `Quiz`와 최고 점수로 복원 | 구현 완료, 정상 재실행 증거 필요 |
+| JSON 저장 | UTF-8 임시 파일 작성 후 교체 | 구현 완료 |
+| 실행 모드 분리 | 실제 `state.json`과 확인용 `state.test.json` 분리 | 구현 완료 |
+| 손상 복구 | 오류 안내, 원본 백업, 기본 데이터 복구 | 직접 실행 캡처·백업 내용 확보 |
+| 안전 종료 | 정상 종료·Ctrl+C·EOF에서 저장 후 안내 | 직접 실행 로그·캡처 확보 |
+
+## 주요 코드 구조와 메서드
+
+- `main.py`: 실행 모드에 맞는 상태 경로를 정하고 `QuizGame.load_state()` 후
+  `QuizGame.run()`을 호출한다.
+- `src/quiz.py`의 `Quiz`: 문제 데이터 검증, `display()`, `is_correct()`,
+  `to_dict()`, `from_dict()`를 담당한다.
+- `src/game_manager.py`의 `QuizGame`: 입력과 메뉴, 플레이, 추가, 목록, 점수,
+  저장·불러오기와 복구 흐름을 관리한다.
+- `save_state()`: 퀴즈와 점수를 임시 JSON 파일에 쓴 뒤 실제 상태 파일로
+  교체해 부분 저장 가능성을 줄인다.
+- `validate_state_data()`: JSON 최상위 구조, 퀴즈 목록과 점수 값을 검증한다.
+- `backup_corrupted_state()`: 손상 원본을 timestamp가 붙은 이름으로 복사한다.
+- `recover_corrupted_state()`: 백업 성공 후에만 기본 데이터로 활성 상태 파일을
+  다시 만든다. 백업이 실패하면 원본 보호를 위해 해당 실행의 저장을 막는다.
+- `safe_exit()`: 정상 종료와 입력 중단 시 가능한 현재 상태를 저장하고 종료한다.
+
+## 데이터 영속성
+
+### 실제 게임 데이터
+
+- 파일: 프로젝트 루트의 `state.json`
+- 용도: 실제 퀴즈 목록과 카테고리별 최고 점수
+- Git: 미션 산출물이므로 추적
+- 저장 시점: 퀴즈 추가 직후, 최고 점수 갱신 직후, 정상·중단 종료 시
+
+### 직접 확인용 데이터
+
+- 파일: 프로젝트 루트의 `state.test.json`
+- 선택 방법: `QUIZ_STATE_MODE=test`
+- 용도: 실제 게임 데이터를 바꾸지 않는 사용자 직접 실행 확인
+- Git: 변경이 반복되므로 추적하지 않음
+
+### 영속성 검증 상태
+
+- JSON 적용 전: 추가한 문제가 재실행 후 사라지는 메모리 동작을
+  [비교 기준 로그](evidence/logs/memory-persistence-test.md)로 보존했다.
+- JSON 적용 후 코드: 퀴즈 추가와 최고 점수 갱신 시 파일 저장, 시작 시 파일
+  불러오기가 연결되어 있다.
+- JSON 적용 후 직접 검증: 추가·플레이·종료·재실행 후 문제와 점수가 유지되는
+  전체 원본 로그는 아직 확보하지 않았다. 확인 전까지 최종 영속성 검증 완료로
+  표시하지 않는다.
+
+## JSON 스키마
 
 ```json
 {
@@ -110,74 +129,87 @@ python main.py
 }
 ```
 
-| 필드 | 설명 |
-|---|---|
-| `quizzes` | 퀴즈 객체 목록 |
-| `category` | 퀴즈 카테고리 문자열 |
-| `question` | 문제 문자열 |
-| `choices` | 4개의 선택지 문자열 목록 |
-| `answer` | 1~4 정답 번호 |
-| `best_scores` | 카테고리 이름을 키로 사용하는 0~100점 최고 점수 |
+`quizzes`는 퀴즈 객체 목록이고 `best_scores`는 카테고리 이름을 키로 사용하는
+0~100점 정수 최고 점수다. `category`와 `question`은 비어 있지 않은 문자열,
+`choices`는 정확히 4개의 문자열, `answer`는 1~4 정수여야 한다.
 
-## Git 작업 계획
+## 손상 파일 복구
+
+손상된 JSON이나 잘못된 스키마를 발견하면 원인을 출력하고, 원본을
+`상태파일명.corrupt-YYYYMMDD-HHMMSS-ffffff`로 복사한 뒤 기본 퀴즈와 빈
+점수로 활성 상태 파일을 복구한다.
+
+사용자가 확인용 파일의 `quizzes` 키를 `quizes`로 바꿔 직접 실행했을 때
+`quizzes는 목록이어야 합니다.`가 출력됐고,
+`state.test.json.corrupt-20260805-181939-287895`가 만들어진 뒤 기본 데이터로
+복구됐다. 캡처와 해당 백업 파일의 실제 내용은
+[JSON 복구 연결 기록](evidence/logs/json-recovery.md)에서 함께 확인할 수 있다.
+
+## 파일 구조
+
+```text
+.
+├── main.py
+├── src/
+│   ├── game_manager.py
+│   ├── quiz.py
+│   └── default_quizzes.py
+├── tests/                     # 과거 개발 기록, 앞으로 실행·수정하지 않음
+├── state.json                 # 실제 게임 상태, Git 추적
+├── state.test.json            # 직접 확인용 상태, Git 제외
+├── README.md
+├── docs/
+│   ├── architecture-plan.md
+│   ├── requirements.md
+│   ├── progress.md
+│   ├── worklog.md
+│   └── troubleshooting.md
+└── evidence/
+    ├── git/
+    ├── logs/
+    └── screenshots/
+```
+
+## 실행 및 작업 증거
+
+| 범위 | 증거 | 설명 |
+|---|---|---|
+| 초기 환경·Git | [초기 Git 기록](evidence/git/git-verification.md), [화면](evidence/git/git-log.png) | 초기 설정 자료 |
+| 메뉴 | [초기 메뉴 화면](evidence/screenshots/menu-test.png) | 기능 구현 초반 자료이며 최종 화면은 나중에 다시 정리 |
+| 퀴즈 목록 | [목록 화면](evidence/screenshots/quiz-list.png) | 가로형 선택지와 문제 간격 확인 |
+| 최고 점수 | [직접 실행 원본 로그](evidence/logs/best-score.md) | JSON 연결 전 점수 계산·조회 흐름 |
+| 안전 종료 | [원본 로그](evidence/logs/safe-exit.md), [화면](evidence/screenshots/safe-exit.png) | Ctrl+C·EOF 처리 |
+| JSON 복구 | [연결 기록](evidence/logs/json-recovery.md), [화면](evidence/screenshots/json-recovery.png) | 오류 원인, 백업 파일명·내용, 기본 복구 연결 |
+| 과거 병합 | [병합 화면](evidence/screenshots/git-merge.png) | 개발 과정 자료; 최종 그래프는 모든 작업 후 다시 확보 |
+
+퀴즈 추가·플레이 결과·정상 영속성 재실행·최종 Git 그래프·clone/pull·최종
+검증 증거는 아직 남아 있다. Git 이력과 메뉴 최종 증거는 모든 기능과 병합이
+끝난 뒤 한 번에 정리한다.
+
+## Git 작업 상태
 
 - 원격 저장소: <https://github.com/naktaa/Codyssey-E1-2-python-quiz>
-- 기본 브랜치: `main` (`origin/main` 추적)
-- 첫 커밋: `a4887e4 Chore: 프로젝트 초기 파일 구성`
-- 기능 브랜치: `feature/solving` 작업 후 `cb4f9cb`에서 병합 완료
-- 현재 `main` 커밋 수: 16개
-- 최신 기능 커밋: `5d08e39 Feat: 퀴즈 목록 조회 기능 구현`
-- 실험 브랜치: `feature/state-json`을 원격에 별도 보관
-- 개발 완료 후 별도 디렉터리에서 clone·수정·push
-- 기존 작업 디렉터리에서 pull 후 반영 확인
+- 기본 브랜치: `main` — `533b98f`
+- 현재 작업 브랜치: `state-json` — `103a3b1`
+- 현재 브랜치 커밋 수: 23개 (`main` 20개)
+- JSON 관련 커밋: `45990d1`, `40fdea5`, `103a3b1`
+- `feature/solving` 작업과 `main` 병합 기록은 이미 존재
+- `state-json`의 `main` 병합, 최종 그래프, clone·pull 기록은 마지막 단계에서 정리
 
-## 실행 및 제출 증거
+## 상세 문서
 
-현재 확보한 증거:
+- [아키텍처와 구현 기준](docs/architecture-plan.md)
+- [요구사항 추적표](docs/requirements.md)
+- [현재 진행 상태](docs/progress.md)
+- [날짜별 작업 기록](docs/worklog.md)
+- [문제 해결 기록](docs/troubleshooting.md)
 
-- [초기 Git 설정 명령과 결과](evidence/git/git-verification.md)
-- [Python·Git 버전과 첫 커밋 상태](evidence/git/git-log.png)
-- [메모리 기반 퀴즈 추가와 재실행 비교](evidence/logs/memory-persistence-test.md)
-- [카테고리별 최고 점수 직접 실행 로그](evidence/logs/best-score.md)
-- `evidence/screenshots/menu-test.png`: 메뉴 예비 화면
-- `evidence/screenshots/git-merge.png`: 브랜치 병합 예비 화면
+## 남은 필수 작업
 
-예비 PNG에는 로컬 계정명과 호스트명이 표시되어 최종 제출 전 다시
-촬영하거나 공개 범위를 확인해야 한다.
-
-기능 구현과 실제 검증 후 아래 파일을 추가한다.
-
-- `evidence/screenshots/env-python-git.png`
-- `evidence/screenshots/menu.png`
-- `evidence/screenshots/add-quiz.png`
-- `evidence/screenshots/quiz-list.png`
-- `evidence/screenshots/play-result.png`
-- `evidence/screenshots/best-score.png`
-- `evidence/screenshots/persistence-restart.png`
-- `evidence/screenshots/git-graph.png`
-- `evidence/screenshots/clone-pull.png`
-- `evidence/logs/final-verification.txt`
-
-## 요구사항과 진행 기록
-
-- 확정 아키텍처: [`docs/architecture-plan.md`](docs/architecture-plan.md)
-- 전체 요구사항: [`docs/requirements.md`](docs/requirements.md)
-- 현재 진행 상태: [`docs/progress.md`](docs/progress.md)
-- 작업 기록: [`docs/worklog.md`](docs/worklog.md)
-- 트러블슈팅: [`docs/troubleshooting.md`](docs/troubleshooting.md)
-
-## 제출 전 체크리스트
-
-- [x] Python 3.10 이상에서 실행 확인
-- [ ] 기본 퀴즈 5개 이상
-- [x] `Quiz`, `QuizGame` 클래스 확인
-- [ ] 모든 메뉴 기능 확인
-- [ ] 잘못된 입력과 중단 입력 처리 확인
-- [ ] `state.json` 재실행 영속성 확인
-- [x] 커밋 10개 이상 확인
-- [x] 브랜치 분기·병합 확인
-- [ ] init/add/commit/push/pull/checkout/clone 사용 확인
-- [x] GitHub push와 저장소 URL 확인
-- [ ] README 필수 항목 실제 내용으로 갱신
-- [ ] 요구된 스크린샷과 로그 확보
-- [ ] 개인정보·토큰·절대 경로 노출 점검
+- [ ] 직접 작성한 기본 퀴즈를 5개 이상으로 보완
+- [ ] 확인용 상태에서 퀴즈 추가·점수 저장 후 재실행 영속성 원본 로그 확보
+- [ ] 현재 JSON 기능을 `main`에 병합
+- [ ] 추가·플레이·영속성 실행 증거 확보
+- [ ] 최종 메뉴와 Git 그래프 증거 재정리
+- [ ] 별도 디렉터리 clone·push 후 기존 폴더 pull 반영 확인
+- [ ] macOS zsh에서 README 절차로 최종 직접 실행 검증

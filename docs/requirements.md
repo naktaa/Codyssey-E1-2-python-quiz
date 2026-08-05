@@ -40,7 +40,7 @@
 | TECH-02 | Quiz에 문제, 선택지 4개, 정답 속성 | 필수 | `src/quiz.py` | 객체 생성과 출력 확인 | 실행 로그 | 3 | `Feat: Quiz 클래스 구현` | 실행 검증 완료 |
 | TECH-03 | Quiz 출력·정답 확인 등 메서드 분리 | 필수 | `src/quiz.py` | 플레이에서 메서드 호출 확인 | 실행 로그 | 3, 5 | `Feat: Quiz 클래스 구현` | 실행 검증 완료 |
 | DATA-01 | 동일 주제의 직접 작성 기본 퀴즈 5개 이상 | 필수 | `src/default_quizzes.py`·`state.json` | 목록에서 개수·내용 확인 | 목록 스크린샷 | 4 | `Feat: 기본 퀴즈 데이터 추가` | 구현 완료 |
-| FUNC-05 | 저장된 퀴즈를 순서대로 출제 | 필수 | `src/game_manager.py` | 전체 퀴즈 플레이 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
+| FUNC-05 | 저장된 퀴즈 출제 | 필수 | `play_quizzes()` | 보너스 적용 전 순차 출제와 최종 무작위 출제 확인 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 구현 완료 |
 | FUNC-06 | 각 답 입력 후 정답·오답 안내 | 필수 | `src/game_manager.py` | 정답과 오답 각각 입력 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
 | FUNC-07 | 모든 문제 종료 후 정답 수·점수 결과 출력 | 필수 | `src/game_manager.py` | 플레이 완료 화면 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
 | FUNC-08 | 퀴즈가 없을 때 플레이 안내 후 메뉴 복귀 | 필수 | `src/game_manager.py` | 빈 목록 상태 직접 실행 | 최종 검증 로그 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 구현 완료 |
@@ -66,7 +66,7 @@
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 구현 중 |
-| EVID-02 | 추가·목록·플레이·점수 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
+| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |
@@ -74,12 +74,13 @@
 
 ## 보너스 요구사항
 
-보너스는 필수 요구사항의 실행 검증과 증거 확보가 끝난 뒤 사용자 승인 후 진행한다.
+보너스는 필수 기능 구현 후 사용자 승인에 따라 `feature/bonus`에서 진행했고,
+사용자가 `main` 병합을 완료했다. 최신 실행 증거는 최종 단계에서 확보한다.
 
 | ID | 요구사항 | 필수 여부 | 구현 위치 | 검증 방법 | 필요한 증거 | 구현 단계 | 권장 커밋 | 현재 상태 |
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 직접 실행해 순서 변화 확인 | 실행 로그 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 구현 완료 |
 | BONUS-02 | 풀이 문제 수 선택 | 선택 | `select_quiz_count()`·`play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 구현 완료 |
 | BONUS-03 | 힌트와 점수 차감 | 선택 | `ask_for_hint()`·`show_hint()`·`play_quizzes()` | 힌트 사용 전후 누적 점수와 사용 횟수 확인 | 실행 로그 | 선택 | `Feat: 힌트와 점수 차감 추가` | 구현 완료 |
-| BONUS-04 | 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
+| BONUS-04 | 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 구현 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `record_game_result()`·`show_score_history()`·JSON 스키마 | 6회 이상 플레이 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |

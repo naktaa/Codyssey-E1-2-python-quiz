@@ -2,13 +2,13 @@
 
 - 수행일: 2026-08-05
 - 실행 방식: 사용자 터미널 직접 실행
-- 개인정보 보호: 셸 프롬프트의 계정명과 호스트명만 `$`로 대체
+- 기록 방식: 터미널 캡처에 표시된 명령과 출력을 그대로 기록
 - 화면 증거: [`../screenshots/safe-exit.png`](../screenshots/safe-exit.png)
 
 ## Ctrl+C 입력 중단
 
 ```console
-$ py main.py
+moneydon779498@c5r7s3 Codyssey-E1-2-python-quiz % py main.py
 
 === 상식 퀴즈 게임 ===
 1. 퀴즈 풀기
@@ -24,7 +24,7 @@ $ py main.py
 ## EOF 입력 중단
 
 ```console
-$ python main.py < /dev/null
+moneydon779498@c5r7s3 Codyssey-E1-2-python-quiz % python main.py < /dev/null
 
 === 상식 퀴즈 게임 ===
 1. 퀴즈 풀기

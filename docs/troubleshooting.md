@@ -113,5 +113,37 @@ python main.py
 
 - 재검증 결과: 성공, 두 경우 모두 traceback 없이 종료 코드 0
 - 관련 변경 파일: `src/game_manager.py`
-- 관련 커밋: 미커밋
+- 관련 커밋: `49f97b5 Fix: 입력 중단 시 안전 종료 처리`
 - 재발 방지: 새 입력 기능은 `run()`이 관리하는 실행 흐름 안에서 호출한다.
+
+---
+
+## 2026-08-05 — 확인용 JSON의 필수 키 이름 오류
+
+- 관련 요구사항: `DATA-05`, `DATA-06`
+- 환경: macOS / zsh / Python 3.12.13
+- 실패 명령 또는 동작:
+
+```zsh
+QUIZ_STATE_MODE=test py
+```
+
+- 증상: 확인용 `state.test.json`의 최상위 키가 `quizzes`가 아니라 `quizes`로
+  기록되어 `상태 파일이 손상되었습니다: quizzes는 목록이어야 합니다.`가 출력됐다.
+- 원인: `validate_state_data()`가 필수 `quizzes` 값을 찾지 못해 `None`을 받고,
+  목록 형식 검증에서 `ValueError`를 발생시켰다.
+- 해결: `load_state()`가 스키마 오류를 잡아 `recover_corrupted_state()`를 호출하고,
+  `backup_corrupted_state()`가 손상 원본을 먼저 복사한 뒤 기본 상태 파일을 만들도록
+  구현했다.
+- 재검증 결과: 성공, traceback 없이 메뉴가 실행됐다.
+- 생성 백업:
+  `state.test.json.corrupt-20260805-181939-287895`
+- 백업 내용: 정상 데이터와 동일한 퀴즈 4개를 포함하지만 최상위 키가
+  `"quizes"`로 잘못 기록된 손상 원본
+- 관련 증거: [복구 연결 기록](../evidence/logs/json-recovery.md),
+  [터미널 캡처](../evidence/screenshots/json-recovery.png)
+- 관련 변경 파일: `src/game_manager.py`, `.gitignore`,
+  `evidence/screenshots/json-recovery.png`
+- 관련 커밋: `103a3b1 Fix: 손상된 상태 파일 백업과 복구 처리`
+- 재발 방지: 상태 데이터를 객체로 사용하기 전에 `validate_state_data()`에서
+  최상위 구조와 각 필드 형식을 검증하고, 손상 원본은 복구 전에 별도 백업한다.

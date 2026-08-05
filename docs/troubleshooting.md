@@ -86,3 +86,32 @@ env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-pycache python3 -m compileall
 - 관련 커밋: 해당 없음
 - 재발 방지: 현재 검증 환경에서 `compileall` 실행 시 동일한 임시 캐시 경로를
   사용한다.
+
+---
+
+## 2026-08-05 — 입력 스트림 종료 시 EOFError traceback
+
+- 관련 요구사항: `FUNC-04`
+- 환경: macOS / zsh / Python 3.12.13
+- 실패 명령 또는 동작:
+
+```zsh
+python main.py < /dev/null
+```
+
+- 증상: 메뉴 입력에서 `EOFError` traceback이 발생하고 종료 코드 1로 끝났다.
+- 원인: 입력 중단 예외를 처리하는 코드가 메뉴 실행 흐름에 없었다.
+- 해결: `run()` 전체에서 `EOFError`와 `KeyboardInterrupt`를 잡고
+  `safe_exit()`로 종료 안내를 출력하도록 변경했다.
+- 재검증 명령:
+
+```zsh
+python main.py < /dev/null
+python main.py
+# 입력 대기 중 Ctrl+C
+```
+
+- 재검증 결과: 성공, 두 경우 모두 traceback 없이 종료 코드 0
+- 관련 변경 파일: `src/game_manager.py`
+- 관련 커밋: 미커밋
+- 재발 방지: 새 입력 기능은 `run()`이 관리하는 실행 흐름 안에서 호출한다.

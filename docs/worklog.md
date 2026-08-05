@@ -403,3 +403,48 @@ python main.py < /dev/null
 ### 다음 작업
 
 - 메뉴 3번의 퀴즈 목록 보기와 빈 목록 안내를 구현한다.
+
+---
+
+## 2026-08-05 — EOF와 Ctrl+C 입력 중단 안전 종료
+
+- 환경: macOS / zsh / Python 3.12.13
+- 브랜치: `main`
+- 목표: 어느 입력 단계에서든 EOF와 Ctrl+C를 traceback 없이 처리
+- 요구사항: `FUNC-04`, `TECH-05`
+
+### 변경 파일
+
+- `src/game_manager.py`: `safe_exit()` 추가, `run()` 전체 입력 중단 처리
+- `evidence/logs/safe-exit-verification.txt`: 직접 실행 검증 결과 기록
+- `README.md`, `docs/requirements.md`, `docs/progress.md`: 검증 상태 반영
+- `docs/troubleshooting.md`: 실제 EOF traceback과 해결 내용 기록
+
+### 실행 명령과 실제 결과
+
+```zsh
+printf '5\n' | python main.py
+python main.py < /dev/null
+python main.py
+# 입력 대기 중 Ctrl+C
+git diff --check
+```
+
+- 결과: 성공
+- 실제 출력 요약: 정상 종료, EOF와 Ctrl+C가 모두 종료 코드 0으로 끝났다.
+- 실제 출력 요약: 입력 중단 시 안내 메시지가 출력되고 traceback은 없었다.
+- 자동 테스트 파일은 사용자 요청에 따라 수정하거나 다시 실행하지 않았다.
+
+### 증거
+
+- `evidence/logs/safe-exit-verification.txt`
+
+### Git 상태
+
+- 커밋: 미커밋
+- push: 미실시
+- 권장 커밋: `Fix: 입력 중단 시 안전 종료 처리`
+
+### 다음 작업
+
+- 메뉴 3번의 퀴즈 목록 보기와 빈 목록 안내를 구현한다.

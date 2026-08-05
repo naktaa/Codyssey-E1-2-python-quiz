@@ -1,0 +1,31 @@
+안전 종료 직접 실행 검증
+수행일: 2026-08-05
+환경: macOS / zsh / Python 3.12.13
+
+[정상 종료]
+명령: printf '5\n' | python main.py
+결과: 종료 코드 0
+마지막 출력: 게임을 종료합니다.
+
+[EOF 종료]
+명령: python main.py < /dev/null
+결과: 종료 코드 0
+출력:
+입력이 중단되었습니다.
+게임을 종료합니다.
+traceback: 없음
+
+[Ctrl+C 종료]
+명령: python main.py
+동작: 메뉴 입력 대기 중 Ctrl+C 입력
+결과: 종료 코드 0
+출력:
+입력이 중단되었습니다.
+게임을 종료합니다.
+traceback: 없음
+
+[코드 형식]
+명령: git diff --check
+결과: 종료 코드 0, 출력 없음
+
+자동 테스트 파일은 수정하지 않았고 unittest도 실행하지 않았다.

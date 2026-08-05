@@ -147,21 +147,32 @@ class QuizGame:
         self.output(f"점수: {score}점")
         return score
 
+    def safe_exit(self, interrupted: bool = False) -> None:
+        """정상 종료와 입력 중단 종료의 안내를 한곳에서 처리한다."""
+        if interrupted:
+            self.output("")
+            self.output("입력이 중단되었습니다.")
+        self.output("게임을 종료합니다.")
+
     def run(self) -> None:
         """종료 메뉴를 선택할 때까지 메인 메뉴를 반복 실행한다."""
-        while True:
-            self.show_menu()
-            choice = self.read_int("메뉴를 선택하세요: ", 1, 5)
+        try:
+            while True:
+                self.show_menu()
+                choice = self.read_int("메뉴를 선택하세요: ", 1, 5)
 
-            if choice == 5:
-                self.output("게임을 종료합니다.")
-                return
+                if choice == 5:
+                    self.safe_exit()
+                    return
 
-            if choice == 1:
-                self.play_quizzes()
-            elif choice == 2:
-                self.add_quiz()
-            else:
-                self.output(
-                    f"[{self.MENU_ITEMS[choice]}] 기능은 아직 구현되지 않았습니다."
-                )
+                if choice == 1:
+                    self.play_quizzes()
+                elif choice == 2:
+                    self.add_quiz()
+                else:
+                    self.output(
+                        f"[{self.MENU_ITEMS[choice]}] 기능은 아직 구현되지 않았습니다."
+                    )
+        # 메뉴, 퀴즈 추가, 플레이 중 발생한 입력 중단을 함께 처리한다.
+        except (KeyboardInterrupt, EOFError):
+            self.safe_exit(interrupted=True)

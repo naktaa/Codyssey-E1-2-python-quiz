@@ -502,7 +502,7 @@ class QuizGame:
         self.output("\n=== 퀴즈 결과 ===")
         self.output(f"정답 수: {correct_count}/{total_count}")
         self.output(f"힌트 사용: {hint_count}회")
-        self.output(f"점수: {score}/{max_score}점")
+        self.output(f"점수: {score}점")
         if self.record_game_result(
             category=category,
             score=score,
@@ -582,7 +582,7 @@ class QuizGame:
         for number, (_, record) in enumerate(recent_history, start=1):
             self.output(
                 f"{number}. {record['played_at']}  {record['category']}  "
-                f"{record['score']}/{record['max_score']}점  "
+                f"{record['score']}점  "
                 f"정답 {record['correct_count']}/{record['total_count']}  "
                 f"힌트 {record['hint_count']}회"
             )

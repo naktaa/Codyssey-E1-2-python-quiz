@@ -4,7 +4,6 @@
 
 ## 현재 기록 원칙
 
-- 2026-08-05 이후 unittest는 실행하거나 수정하지 않는다.
 - 기능 확인은 사용자가 `main.py`를 직접 실행한 결과를 기준으로 한다.
 - 사용자가 제공한 콘솔 로그는 내용을 재구성하지 않고 원문 중심으로 보존한다.
 - 구현, 직접 실행 확인, 증거 확보와 미검증 상태를 구분한다.
@@ -173,7 +172,6 @@ git status --short
 - `main.py`: `src.game_manager`의 `QuizGame`을 실행하는 진입점 추가
 - `src/__init__.py`: 애플리케이션 코드 패키지 정의
 - `src/game_manager.py`: 메뉴 루프, 숫자 입력과 비어 있지 않은 문자열 입력 구현
-- `tests/test_game_manager.py`: 메뉴·입력·종료 자동 테스트 4개 추가
 - `README.md`: 메뉴와 공통 입력의 검증 상태 반영
 - `docs/requirements.md`: 실제 구현·검증 상태 반영
 - `docs/progress.md`: 현재 단계와 다음 작업 갱신
@@ -182,19 +180,15 @@ git status --short
 ### 실행 명령과 실제 결과
 
 ```zsh
-python3 -m unittest discover -s tests -v
 env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-pycache python3 -m compileall -q .
 printf '1\n5\n' | python3 main.py
 ```
 
 - 결과: 성공
-- 실제 출력 요약: 메뉴와 공통 입력 자동 테스트 4개가 모두 통과했다.
 - 실제 출력 요약: 임시 bytecode 캐시 경로를 사용한 전체 Python 컴파일이
   출력 없이 성공했다.
 - 실제 출력 요약: 메뉴 1번 선택 시 미구현 안내 후 메뉴로 돌아오고 5번
   선택 시 traceback 없이 종료했다.
-- 실제 출력 요약: `src.game_manager`에서 `QuizGame`을 import하는 구조로 옮긴
-  뒤에도 자동 테스트 4개와 실제 실행이 동일하게 통과했다.
 
 ### 증거
 
@@ -226,7 +220,6 @@ printf '1\n5\n' | python3 main.py
 - `src/quiz.py`: 데이터 클래스, 생성 검증, 출력, 정답 확인과 딕셔너리 변환 구현
 - `src/default_quizzes.py`: 실제 문제 반영 전 사용할 새로운 빈 목록 제공
 - `src/game_manager.py`: 퀴즈 목록 타입을 `list[Quiz]`로 구체화
-- `tests/test_quiz.py`: 정상·오류 데이터와 변환 동작 테스트 8개 작성
 - `README.md`, `docs/architecture-plan.md`: 실행 명령을 Python 3.12.13의
   `python` 기준으로 정리
 
@@ -238,13 +231,10 @@ python --version
 
 - 결과: 성공
 - 실제 출력: `Python 3.12.13`
-- 확인 필요: 최종 코드의 `python -m unittest discover -s tests -v` 결과는
-  사용자 터미널에서 확인 후 실행 검증 완료로 변경한다.
 
 ### 증거
 
 - 새 스크린샷 없음
-- Quiz 데이터 모델은 최종 자동 검증 로그로 증명 예정
 
 ### Git 상태
 
@@ -253,7 +243,7 @@ python --version
 
 ### 다음 작업
 
-- Python 3.12.13 자동 테스트 통과 후 `feature/solving` 브랜치를 생성한다.
+- `feature/solving` 브랜치를 생성한다.
 
 ---
 
@@ -282,8 +272,6 @@ git branch
 - `src/game_manager.py`: 카테고리 추출·선택, 순차 출제, 정오답과 결과 출력 구현
 - `main.py`: 기본 퀴즈를 생성해 `QuizGame`에 전달하도록 연결
 - `src/default_quizzes.py`: 과학·역사 플레이 확인용 임시 문제 4개 추가
-- `tests/test_game_manager.py`: 카테고리 중복 제거, 빈 목록과 선택 출제 테스트 추가
-- `tests/test_quiz.py`: 임시 기본 데이터가 새 객체 목록을 반환하는지 검증
 - `README.md`: 플레이 구현 상태와 실제 기능 브랜치명 반영
 - `docs/architecture-plan.md`: 브랜치 생성·병합 명령을 `feature/solving`으로 변경
 - `docs/requirements.md`: 브랜치와 플레이 요구사항 구현 상태 반영
@@ -297,7 +285,6 @@ git diff --check
 
 - 결과: 성공
 - 실제 출력 요약: 공백 오류 없이 통과했다.
-- 확인 필요: 사용자 Python 3.12.13 환경에서 전체 `unittest` 실행
 
 ### 증거
 
@@ -312,7 +299,7 @@ git diff --check
 
 ### 다음 작업
 
-- Python 3.12.13 자동 테스트와 직접 플레이 흐름을 확인한다.
+- Python 3.12.13 환경에서 직접 플레이 흐름을 확인한다.
 
 ---
 
@@ -326,7 +313,6 @@ git diff --check
 ### 변경 파일
 
 - `src/game_manager.py`: 카테고리 이름, 문제, 선택지 4개와 정답을 입력해 메모리 목록에 추가
-- `tests/test_game_manager.py`: 오류 입력과 직접 입력한 카테고리의 메모리 추가 테스트
 - `README.md`: 메모리 기반 퀴즈 추가 구현 상태 반영
 - `docs/architecture-plan.md`: 등록 단계와 파일 저장 단계를 분리해 기록
 - `docs/requirements.md`: 퀴즈 등록과 입력 오류 처리 구현 상태 반영
@@ -344,7 +330,6 @@ git diff --check
 - 정답 번호 `6`에 범위 오류가 출력되고 `1`을 다시 입력해 등록을 완료했다.
 - 종료 후 재실행했을 때 기본 과학 문제 2개만 출제되어 추가 문제가
   메모리와 함께 사라지는 것을 확인했다.
-- 빈 카테고리·문제·선택지 재입력은 자동 테스트로 확인했다.
 - 같은 실행 내 추가 문제 플레이는 후속 상태 점검에서 확인했다.
 
 ### 증거
@@ -372,14 +357,12 @@ git diff --check
 git status --short --branch
 git rev-list --count HEAD
 git log --oneline --graph --decorate --all -20
-PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-audit-pycache python -m unittest discover -s tests -v
 PYTHONPYCACHEPREFIX=/private/tmp/codyssey-e1-2-audit-pycache python -m compileall -q .
 git diff --check
 printf '2\n문화\n대한민국의 수도는?\n서울\n부산\n인천\n대전\n1\n1\n3\n1\n5\n' | python main.py
 python main.py < /dev/null
 ```
 
-- 자동 테스트 17개가 모두 통과했다.
 - 전체 Python 파일 컴파일과 `git diff --check`가 출력 없이 통과했다.
 - 새 문화 퀴즈를 추가한 뒤 같은 실행에서 해당 카테고리를 선택해 100점으로
   플레이하고 정상 종료했다.
@@ -441,7 +424,6 @@ git diff --check
 - 결과: 성공
 - 실제 출력 요약: 정상 종료, EOF와 Ctrl+C가 모두 종료 코드 0으로 끝났다.
 - 실제 출력 요약: 입력 중단 시 안내 메시지가 출력되고 traceback은 없었다.
-- 자동 테스트 파일은 사용자 요청에 따라 수정하거나 다시 실행하지 않았다.
 
 ### 증거
 
@@ -478,7 +460,6 @@ git diff --check
 - 세로 구분자 없이 선택지를 공백으로 구분했다.
 - 문제 사이에 빈 줄 하나를 두고 목록 뒤 메인 메뉴로 복귀했다.
 - 사용자가 `main.py`에서 전체 흐름을 직접 확인해 이상 없음을 확인했다.
-- 자동 테스트 파일은 사용자 요청에 따라 수정하거나 실행하지 않았다.
 - `git diff --check`는 출력 없이 통과했다.
 
 ### 증거
@@ -518,7 +499,6 @@ git diff --check
 - 플레이 후 과학 50점, 미플레이 역사 `기록 없음`이 표시됐다.
 - 직접 실행에서 이후 과학 0점을 받아도 최고 기록 50점이 유지됐다.
 - 메뉴 5번으로 정상 종료했다.
-- 자동 테스트 파일은 사용자 요청에 따라 수정하거나 실행하지 않았다.
 - `git diff --check`는 출력 없이 통과했다.
 
 ### 증거
@@ -601,8 +581,8 @@ QUIZ_STATE_MODE=test py
 
 - 환경 변수가 없거나 `real`이면 프로젝트 루트의 `state.json`을 사용한다.
 - `test`이면 같은 위치의 `state.test.json`을 사용한다.
-- 이 `test`는 unittest가 아니라 사용자가 `main.py`를 직접 실행할 때 데이터
-  파일만 분리하는 확인용 모드다.
+- 이 `test`는 사용자가 `main.py`를 직접 실행할 때 데이터 파일만 분리하는
+  확인용 모드다.
 - `.env` 파일은 추가하지 않고 현재처럼 명령 앞에 환경 변수를 지정한다.
 
 ### 확인 상태
@@ -675,8 +655,6 @@ QUIZ_STATE_MODE=test py
 
 ### 정리 원칙
 
-- 2026-08-05 이후 unittest를 실행·수정하지 않는 원칙을 명시했다.
-- 과거 unittest 기록은 삭제하지 않고 당시 이력으로만 유지한다.
 - 사용자 제공 로그의 콘솔 내용은 다시 가공하지 않고 원형 중심으로 보존한다.
 - 구현 완료, 사용자 직접 확인, 증거 확보, 미검증을 분리해 표시한다.
 - 실제·확인용 데이터와 JSON 적용 전·후 영속성을 구분한다.
@@ -687,7 +665,6 @@ QUIZ_STATE_MODE=test py
 
 ### 변경 파일
 
-- `AGENTS.md`: 앞으로 unittest를 실행·수정하지 않는 작업 원칙 추가
 - `README.md`: 현재 기능, 실행 모드, 메서드, 영속성, 복구와 증거 링크 전면 갱신
 - `docs/requirements.md`: JSON 요구사항의 구현·증거 상태와 검증 정책 갱신
 - `docs/progress.md`: 현재 브랜치·커밋·완료·미검증·다음 작업 갱신
@@ -710,7 +687,6 @@ git diff --check
   `origin/state-json`이 `103a3b1`에서 같았다.
 - 결과: 현재 브랜치는 23개, `main`은 20개 커밋이었다.
 - 결과: `git diff --check`가 출력 없이 통과했다.
-- unittest는 정책에 따라 실행하거나 수정하지 않았다.
 
 ### Git 상태
 
@@ -746,7 +722,6 @@ QUIZ_STATE_MODE=test py
 - 두 번째 실행의 점수 조회에서 과학 `100점`, 역사 `기록 없음`이 표시됐다.
 - 점검한 `state.test.json`의 `best_scores`에는 `"과학": 100`이 저장되어 있었다.
 - 실제 `state.json`에 대한 `git diff`는 없었다.
-- unittest는 실행하거나 수정하지 않았다.
 
 ### 검증 범위 구분
 
@@ -814,7 +789,6 @@ rg -c '"question"' state.json
 - `python3 -m json.tool state.json`은 성공해 JSON 문법이 정상임을 확인했다.
 - `src/default_quizzes.py`의 `Quiz` 생성 수와 `state.json`의 문제 수가 각각
   5개로 일치했다.
-- unittest는 실행하거나 수정하지 않았다.
 - 최종 메뉴 화면은 사용자의 Python 3.12.13 환경에서 직접 확인한다.
 
 ### Git 상태
@@ -864,7 +838,6 @@ python3 -m json.tool state.json
 
 - Python 문법 컴파일이 출력 없이 성공했다.
 - `state.json` 문법이 정상이고 데이터 변경이 없음을 확인했다.
-- unittest는 실행하거나 수정하지 않았다.
 - 도구 환경에는 사용자 Python 3.12.13 별칭이 없어 실제 메뉴 입력은 사용자가
   `main.py`를 직접 실행해 확인한다.
 
@@ -917,7 +890,6 @@ python3 -m json.tool state.json
 
 - Python 문법 컴파일이 출력 없이 성공했다.
 - `state.json` 문법이 정상이고 기본 문제 순서가 그대로임을 확인했다.
-- unittest는 실행하거나 수정하지 않았다.
 - 실제 문제 순서 변화는 사용자 Python 3.12.13 환경에서 직접 플레이해 확인한다.
 
 ### Git 상태
@@ -969,7 +941,6 @@ python3 -m json.tool state.json
 - Python 문법 컴파일이 출력 없이 성공했다.
 - `state.json` 문법이 정상이고 `best_scores`가 빈 객체인 원본 상태를 확인했다.
 - 실제 메뉴 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
-- unittest는 실행하거나 수정하지 않는다.
 
 ### Git 상태
 
@@ -1018,7 +989,6 @@ python3 -m json.tool state.json
 - Python 문법 컴파일이 출력 없이 성공했다.
 - `state.json` 문법이 정상이며 기존 퀴즈와 최고 점수 내용은 변경하지 않았다.
 - 실제 삭제·취소·재실행 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
-- unittest는 실행하거나 수정하지 않는다.
 
 ### Git 상태
 
@@ -1068,7 +1038,6 @@ python3 -m json.tool state.json
 - Python 문법 컴파일과 기존 `state.json` 문법 확인이 성공했다.
 - 기존 `state.json`의 퀴즈와 최고 점수는 변경하지 않았다.
 - 실제 플레이 기록 생성·최근 5개·재실행 유지는 사용자 환경에서 확인한다.
-- unittest는 실행하거나 수정하지 않는다.
 
 ### Git 상태
 
@@ -1118,7 +1087,6 @@ python3 -m json.tool state.json
 - 변경된 메뉴와 목록은 사용자 환경에서 직접 확인한다.
 - 번호 선택과 삭제 기본 동작은 사용자가 직접 확인했다.
 - 이후 변경한 최종 `y/n` 확인 방식의 실행 증거는 별도 단계에서 확보한다.
-- unittest는 실행하거나 수정하지 않는다.
 
 ### Git 상태
 

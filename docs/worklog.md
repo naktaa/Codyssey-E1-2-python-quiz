@@ -416,7 +416,7 @@ python main.py < /dev/null
 ### 변경 파일
 
 - `src/game_manager.py`: `safe_exit()` 추가, `run()` 전체 입력 중단 처리
-- `evidence/logs/safe-exit-verification.txt`: 직접 실행 검증 결과 기록
+- `evidence/logs/safe-exit.md`: 사용자 직접 실행 원문 기록
 - `README.md`, `docs/requirements.md`, `docs/progress.md`: 검증 상태 반영
 - `docs/troubleshooting.md`: 실제 EOF traceback과 해결 내용 기록
 
@@ -437,7 +437,8 @@ git diff --check
 
 ### 증거
 
-- `evidence/logs/safe-exit-verification.txt`
+- `evidence/logs/safe-exit.md`
+- `evidence/screenshots/safe-exit.png`
 
 ### Git 상태
 

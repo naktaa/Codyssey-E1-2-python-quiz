@@ -56,5 +56,8 @@
       "answer": 3
     }
   ],
-  "best_scores": {}
+  "best_scores": {
+    "과학": 4,
+    "역사": 4
+  }
 }

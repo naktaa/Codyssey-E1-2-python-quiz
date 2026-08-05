@@ -826,3 +826,306 @@ rg -c '"question"' state.json
 ### 다음 작업
 
 - 보너스 기능의 기반이 되는 풀이 문제 수 선택 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 풀이 문제 수 선택 보너스 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 선택한 카테고리에서 원하는 수의 문제만 풀 수 있게 구현
+- 요구사항: `BONUS-02`
+
+### 변경 파일
+
+- `src/game_manager.py`: `select_quiz_count()` 추가와 출제 목록 제한
+- `README.md`: 풀이 문제 수 기능과 메서드 설명 추가
+- `docs/requirements.md`: BONUS-02 구현 완료 반영
+- `docs/progress.md`: 구현 내용과 다음 무작위 출제 작업 반영
+- `docs/architecture-plan.md`: 플레이 흐름과 메서드 목록 갱신
+- `docs/worklog.md`: 구현과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 카테고리를 선택한 뒤 해당 카테고리의 전체 문제 수를 출력한다.
+- `read_int()`를 재사용해 1부터 전체 문제 수 범위의 입력만 허용한다.
+- 선택한 개수만큼 기존 문제 목록 앞부분을 잘라 저장 순서대로 출제한다.
+- 결과 계산은 제한된 출제 목록의 길이를 사용하므로 정답 수와 100점 환산 점수의
+  분모도 사용자가 선택한 문제 수로 자동 변경된다.
+- 원본 퀴즈 목록과 JSON 스키마는 변경하지 않는다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-quiz-count-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 데이터 변경이 없음을 확인했다.
+- unittest는 실행하거나 수정하지 않았다.
+- 도구 환경에는 사용자 Python 3.12.13 별칭이 없어 실제 메뉴 입력은 사용자가
+  `main.py`를 직접 실행해 확인한다.
+
+### Git 상태
+
+- `main`의 `392afec Feat: 기본 상식 퀴즈 5개 구성`에서
+  `feature/bonus` 브랜치를 생성
+- 이번 요청에 따라 풀이 문제 수 선택 변경을 첫 커밋으로 정리
+- `state.json`의 사용자 플레이 점수 변경은 보너스 코드 커밋에서 제외
+- push와 이후 Git 조작은 사용자 직접 수행
+
+### 다음 작업
+
+- 선택한 문제 수만큼 원본 목록을 바꾸지 않고 무작위 출제하는 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 문제 선택과 출제 순서 무작위화
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 사용자가 선택한 문제 수만큼 중복 없이 뽑아 무작위 순서로 출제
+- 요구사항: `BONUS-01`
+
+### 변경 파일
+
+- `src/game_manager.py`: 표준 라이브러리 `random`과 `random.sample()` 연결
+- `README.md`: 무작위 선택·출제와 원본 순서 보존 설명
+- `docs/requirements.md`: BONUS-01 구현 완료 반영
+- `docs/progress.md`: 구현 상태와 다음 힌트 작업 반영
+- `docs/architecture-plan.md`: 변경된 플레이 흐름 기록
+- `docs/worklog.md`: 구현과 정적 확인 기록
+
+### 구현 내용
+
+- 카테고리 문제 객체 목록을 `random.sample()`의 모집단으로 전달한다.
+- `k`에는 사용자가 앞 단계에서 선택한 문제 수를 전달한다.
+- 반환된 새 목록은 선택된 문제와 순서가 모두 무작위이며 한 게임에서 중복이 없다.
+- 반환된 순서 그대로 문제 번호를 붙여 출제한다.
+- `self.quizzes` 원본 목록을 직접 섞거나 수정하지 않는다.
+- `state.json`을 다시 쓰지 않으므로 JSON의 저장 순서도 유지된다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-random-quiz-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 기본 문제 순서가 그대로임을 확인했다.
+- unittest는 실행하거나 수정하지 않았다.
+- 실제 문제 순서 변화는 사용자 Python 3.12.13 환경에서 직접 플레이해 확인한다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 힌트 제공 방식과 힌트 사용 시 점수 차감 기준을 확정한 뒤 구현한다.
+
+---
+
+## 2026-08-05 — 수동 힌트와 누적 점수 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 문제별 수동 힌트와 힌트 사용에 따른 차등 점수, 결과 집계 추가
+- 요구사항: `BONUS-03`
+
+### 변경 파일
+
+- `src/game_manager.py`: 힌트 선택·출력과 문제별 누적 점수 계산 추가
+- `README.md`: 힌트 동작, 점수 기준과 이전 기록 호환성 설명
+- `docs/requirements.md`: BONUS-03 구현 완료 반영
+- `docs/progress.md`: 구현 상태와 다음 퀴즈 삭제 작업 반영
+- `docs/architecture-plan.md`: 힌트 메서드와 플레이 흐름 갱신
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- `ask_for_hint()`가 각 문제에서 힌트 보기 또는 바로 풀기를 선택받는다.
+- `show_hint()`가 정답 하나와 무작위 오답 하나를 골라 두 개의 후보를 출력한다.
+- 힌트 없이 정답이면 3점, 힌트 사용 후 정답이면 1점, 오답이면 0점이다.
+- 힌트를 본 횟수는 정답 여부와 관계없이 `hint_count`에 누적한다.
+- 결과 화면은 정답 수, 힌트 사용 횟수와 `획득 점수/출제 문제 수 × 3점`을
+  출력한다.
+- 최고 점수 JSON 검증 범위를 0~100에서 0 이상의 정수로 변경했다.
+- 이전 100점 환산 최고 점수는 삭제하거나 변환하지 않고 그대로 불러온다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-hint-score-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 `best_scores`가 빈 객체인 원본 상태를 확인했다.
+- 실제 메뉴 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 삭제할 문제를 선택·확인하고 JSON에 즉시 반영하는 퀴즈 삭제 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 퀴즈 삭제와 JSON 즉시 반영 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 선택한 퀴즈를 확인 후 삭제하고 활성 상태 파일에 즉시 반영
+- 요구사항: `BONUS-04`
+
+### 변경 파일
+
+- `src/game_manager.py`: 삭제 메뉴와 `delete_quiz()` 구현
+- `README.md`: 삭제 기능·메서드·저장 시점 반영
+- `docs/requirements.md`: BONUS-04 구현 완료 반영
+- `docs/progress.md`: 삭제 기능과 다음 점수 히스토리 작업 기록
+- `docs/architecture-plan.md`: 메뉴와 삭제 흐름 갱신
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 메인 메뉴의 5번을 퀴즈 삭제, 6번을 종료로 변경했다.
+- 삭제할 카테고리와 해당 카테고리의 문제 번호를 공통 숫자 입력으로 선택한다.
+- 선택한 문제 내용을 다시 출력하고 삭제 또는 취소를 입력받는다.
+- 삭제 확인 후 `save_state()`로 활성 상태 파일에 즉시 저장한다.
+- 카테고리의 마지막 문제를 삭제하면 해당 카테고리의 최고 점수도 제거한다.
+- 저장에 실패하면 퀴즈 목록과 최고 점수를 삭제 전 메모리 상태로 되돌린다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-delete-quiz-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이며 기존 퀴즈와 최고 점수 내용은 변경하지 않았다.
+- 실제 삭제·취소·재실행 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 날짜와 시간을 포함하는 점수 기록 히스토리의 저장 구조와 표시 방식을 설계한다.
+
+---
+
+## 2026-08-05 — 최근 플레이 기록 5개 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 모든 플레이 결과를 JSON에 저장하고 최근 5개를 메뉴에서 조회
+- 요구사항: `BONUS-05`
+
+### 변경 파일
+
+- `src/game_manager.py`: 기록 검증·저장·최근 5개 출력과 메뉴 연결
+- `README.md`: 플레이 기록 동작과 JSON 스키마 설명
+- `docs/requirements.md`: BONUS-05 구현 완료 반영
+- `docs/progress.md`: 보너스 구현 상태와 다음 통합 확인 작업 반영
+- `docs/architecture-plan.md`: 기록 구조와 저장·조회 흐름 추가
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 플레이 완료 시 `YYYY-MM-DD HH:MM` 형식의 로컬 시각을 기록한다.
+- 카테고리, 점수·만점, 정답·문제 수와 힌트 사용 횟수를 함께 저장한다.
+- `record_game_result()`가 기록 추가와 최고 점수 갱신 후 JSON을 한 번 저장한다.
+- 저장 실패 시 새 기록과 최고 점수를 저장 전 메모리 상태로 되돌린다.
+- 메뉴 3번에서 카테고리별 최고 점수와 최근 플레이 기록을 함께 출력한다.
+- JSON에는 전체 기록을 보관하고 화면에는 날짜 기준 최근 5개만 표시한다.
+- 같은 분에 기록된 결과는 목록에 나중에 추가된 항목을 먼저 표시한다.
+- 이전 JSON에 `score_history`가 없으면 빈 목록으로 읽어 하위 호환한다.
+- 퀴즈 삭제 시 과거 플레이 기록은 유지한다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-score-history-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일과 기존 `state.json` 문법 확인이 성공했다.
+- 기존 `state.json`의 퀴즈와 최고 점수는 변경하지 않았다.
+- 실제 플레이 기록 생성·최근 5개·재실행 유지는 사용자 환경에서 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 보너스 기능 전체를 직접 실행해 기능 간 연결과 JSON 재실행 유지를 확인한다.
+
+---
+
+## 2026-08-05 — 메뉴·목록·삭제 확인 방식 정리
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 관련 메뉴를 묶고 목록과 삭제 입력을 간결하게 개선
+
+### 변경 파일
+
+- `src/game_manager.py`: 메뉴 순서, 질문 전용 목록과 `read_yes_no()` 반영
+- `README.md`: 최종 메뉴·목록·삭제 동작과 과거 목록 증거 구분
+- `docs/requirements.md`: BONUS-04 직접 확인 상태와 `y/n` 입력 반영
+- `docs/progress.md`: 현재 출력과 입력 방식 반영
+- `docs/architecture-plan.md`: 메뉴와 세부 기능 흐름 갱신
+- `docs/worklog.md`: 변경 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 메뉴를 풀기, 목록, 최고 점수, 추가, 삭제, 종료 순서로 재배치했다.
+- 추가와 삭제가 각각 4번과 5번에 이어서 표시된다.
+- 퀴즈 목록에서는 답안 선택지를 숨기고 카테고리별 질문만 연속 표시한다.
+- 삭제 대상은 기존대로 카테고리 번호와 문제 번호로 선택한다.
+- 마지막 삭제 확인은 숫자 메뉴 대신 `y/n`으로 처리한다.
+- `read_yes_no()`는 앞뒤 공백과 대소문자를 정리하고 다른 입력은 다시 받는다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-menu-list-delete-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이며 저장 데이터는 변경하지 않았다.
+- 변경된 메뉴와 목록은 사용자 환경에서 직접 확인한다.
+- 삭제 기능의 정상 동작은 사용자가 직접 확인했다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 날짜와 시간을 포함하는 점수 기록 히스토리의 저장 구조와 표시 방식을 설계한다.

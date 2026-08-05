@@ -281,8 +281,17 @@ class QuizGame:
         choice = self.read_int("카테고리를 선택하세요: ", 1, len(categories))
         return categories[choice - 1]
 
+    def select_quiz_count(self, category: str, total_count: int) -> int:
+        """선택한 카테고리에서 풀 문제 수를 입력받는다."""
+        self.output(f"\n{category} 카테고리에는 총 {total_count}문제가 있습니다.")
+        return self.read_int(
+            f"풀 문제 수를 입력하세요(1~{total_count}): ",
+            1,
+            total_count,
+        )
+
     def play_quizzes(self) -> int | None:
-        """선택한 카테고리의 퀴즈를 순서대로 출제하고 점수를 반환한다."""
+        """선택한 카테고리에서 지정한 수의 퀴즈를 출제한다."""
         category = self.select_category()
         if category is None:
             return None
@@ -292,6 +301,8 @@ class QuizGame:
             for quiz in self.quizzes
             if quiz.category.casefold() == category.casefold()
         ]
+        quiz_count = self.select_quiz_count(category, len(selected_quizzes))
+        selected_quizzes = selected_quizzes[:quiz_count]
         correct_count = 0
 
         self.output(f"\n=== {category} 퀴즈 ===")

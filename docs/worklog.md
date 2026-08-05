@@ -826,3 +826,56 @@ rg -c '"question"' state.json
 ### 다음 작업
 
 - 보너스 기능의 기반이 되는 풀이 문제 수 선택 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 풀이 문제 수 선택 보너스 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 선택한 카테고리에서 원하는 수의 문제만 풀 수 있게 구현
+- 요구사항: `BONUS-02`
+
+### 변경 파일
+
+- `src/game_manager.py`: `select_quiz_count()` 추가와 출제 목록 제한
+- `README.md`: 풀이 문제 수 기능과 메서드 설명 추가
+- `docs/requirements.md`: BONUS-02 구현 완료 반영
+- `docs/progress.md`: 구현 내용과 다음 무작위 출제 작업 반영
+- `docs/architecture-plan.md`: 플레이 흐름과 메서드 목록 갱신
+- `docs/worklog.md`: 구현과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 카테고리를 선택한 뒤 해당 카테고리의 전체 문제 수를 출력한다.
+- `read_int()`를 재사용해 1부터 전체 문제 수 범위의 입력만 허용한다.
+- 선택한 개수만큼 기존 문제 목록 앞부분을 잘라 저장 순서대로 출제한다.
+- 결과 계산은 제한된 출제 목록의 길이를 사용하므로 정답 수와 100점 환산 점수의
+  분모도 사용자가 선택한 문제 수로 자동 변경된다.
+- 원본 퀴즈 목록과 JSON 스키마는 변경하지 않는다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-quiz-count-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 데이터 변경이 없음을 확인했다.
+- unittest는 실행하거나 수정하지 않았다.
+- 도구 환경에는 사용자 Python 3.12.13 별칭이 없어 실제 메뉴 입력은 사용자가
+  `main.py`를 직접 실행해 확인한다.
+
+### Git 상태
+
+- `main`의 `392afec Feat: 기본 상식 퀴즈 5개 구성`에서
+  `feature/bonus` 브랜치를 생성
+- 이번 요청에 따라 풀이 문제 수 선택 변경을 첫 커밋으로 정리
+- `state.json`의 사용자 플레이 점수 변경은 보너스 코드 커밋에서 제외
+- push와 이후 Git 조작은 사용자 직접 수행
+
+### 다음 작업
+
+- 선택한 문제 수만큼 원본 목록을 바꾸지 않고 무작위 출제하는 기능을 구현한다.

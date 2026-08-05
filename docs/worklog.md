@@ -1031,6 +1031,58 @@ python3 -m json.tool state.json
 
 ---
 
+## 2026-08-05 — 최근 플레이 기록 5개 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 모든 플레이 결과를 JSON에 저장하고 최근 5개를 메뉴에서 조회
+- 요구사항: `BONUS-05`
+
+### 변경 파일
+
+- `src/game_manager.py`: 기록 검증·저장·최근 5개 출력과 메뉴 연결
+- `README.md`: 플레이 기록 동작과 JSON 스키마 설명
+- `docs/requirements.md`: BONUS-05 구현 완료 반영
+- `docs/progress.md`: 보너스 구현 상태와 다음 통합 확인 작업 반영
+- `docs/architecture-plan.md`: 기록 구조와 저장·조회 흐름 추가
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 플레이 완료 시 `YYYY-MM-DD HH:MM` 형식의 로컬 시각을 기록한다.
+- 카테고리, 점수·만점, 정답·문제 수와 힌트 사용 횟수를 함께 저장한다.
+- `record_game_result()`가 기록 추가와 최고 점수 갱신 후 JSON을 한 번 저장한다.
+- 저장 실패 시 새 기록과 최고 점수를 저장 전 메모리 상태로 되돌린다.
+- 메뉴 3번에서 카테고리별 최고 점수와 최근 플레이 기록을 함께 출력한다.
+- JSON에는 전체 기록을 보관하고 화면에는 날짜 기준 최근 5개만 표시한다.
+- 같은 분에 기록된 결과는 목록에 나중에 추가된 항목을 먼저 표시한다.
+- 이전 JSON에 `score_history`가 없으면 빈 목록으로 읽어 하위 호환한다.
+- 퀴즈 삭제 시 과거 플레이 기록은 유지한다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-score-history-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일과 기존 `state.json` 문법 확인이 성공했다.
+- 기존 `state.json`의 퀴즈와 최고 점수는 변경하지 않았다.
+- 실제 플레이 기록 생성·최근 5개·재실행 유지는 사용자 환경에서 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 보너스 기능 전체를 직접 실행해 기능 간 연결과 JSON 재실행 유지를 확인한다.
+
+---
+
 ## 2026-08-05 — 메뉴·목록·삭제 확인 방식 정리
 
 - 환경: macOS / zsh

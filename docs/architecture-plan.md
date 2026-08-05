@@ -79,6 +79,7 @@ Quiz(
 ```python
 quizzes: list[Quiz]
 best_scores: dict[str, int]
+score_history: list[dict[str, str | int]]
 state_path: Path
 ```
 
@@ -99,6 +100,9 @@ state_path: Path
 - `list_quizzes()`
 - `delete_quiz()`
 - `show_best_scores()`
+- `record_game_result()`
+- `show_score_history()`
+- `show_score_records()`
 - `load_state()`
 - `save_state()`
 - `validate_state_data()`
@@ -115,7 +119,7 @@ state_path: Path
 ```text
 1. 퀴즈 풀기
 2. 퀴즈 목록 보기
-3. 카테고리별 최고 점수
+3. 최고 점수와 기록
 4. 퀴즈 추가
 5. 퀴즈 삭제
 6. 종료
@@ -174,6 +178,16 @@ state_path: Path
 - 이전 100점 환산 기록은 형식상 유효하므로 자동 변환하거나 삭제하지 않는다.
   새 방식 확인 시 확인용 상태의 `best_scores`를 비워 서로 다른 기준을 분리한다.
 
+### 플레이 기록
+
+- 플레이가 끝날 때 `record_game_result()`가 시각과 결과를 목록에 추가한다.
+- 시각은 로컬 시스템 시간을 `YYYY-MM-DD HH:MM` 형식으로 저장한다.
+- 카테고리, 점수·만점, 정답 수·문제 수와 힌트 사용 횟수를 함께 저장한다.
+- 최고 점수 갱신과 플레이 기록 추가는 `save_state()` 한 번으로 반영한다.
+- JSON에는 모든 기록을 유지하고 화면에는 시각 기준 최근 5개만 최신순으로
+  표시한다. 같은 분의 기록은 나중에 추가된 기록을 먼저 표시한다.
+- 퀴즈나 카테고리를 삭제해도 이미 완료한 과거 기록은 유지한다.
+
 ## 공통 입력과 안전 종료
 
 - 입력 앞뒤의 공백을 제거한다.
@@ -201,7 +215,18 @@ state_path: Path
   ],
   "best_scores": {
     "과학": 7
-  }
+  },
+  "score_history": [
+    {
+      "played_at": "2026-08-05 21:34",
+      "category": "과학",
+      "score": 4,
+      "max_score": 6,
+      "correct_count": 2,
+      "total_count": 2,
+      "hint_count": 1
+    }
+  ]
 }
 ```
 
@@ -211,6 +236,7 @@ state_path: Path
 - UTF-8, `ensure_ascii=False`, 들여쓰기 2칸으로 저장한다.
 - 임시 파일을 먼저 작성한 뒤 교체하여 부분 저장을 방지한다.
 - 파일이 없으면 기본 퀴즈와 빈 최고 점수로 시작한다.
+- 기존 파일에 `score_history`가 없으면 빈 목록으로 불러온다.
 - JSON 문법이나 스키마가 손상되었으면 timestamp가 붙은 파일로 원본을
   백업한 뒤 기본 상태를 만든다.
 - 백업에 실패하면 원본을 덮어쓰지 않고 메모리 상태로 실행한다.

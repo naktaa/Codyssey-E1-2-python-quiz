@@ -37,6 +37,7 @@ htmlcov/
 *~
 
 # Keep mission evidence and state.json trackable
+state.test.json
 !state.json
 !evidence/
 !evidence/**

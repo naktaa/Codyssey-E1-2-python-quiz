@@ -1,4 +1,5 @@
 import json
+import os
 from collections.abc import Callable
 from pathlib import Path
 
@@ -7,6 +8,18 @@ from .quiz import Quiz
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATE_PATH = PROJECT_ROOT / "state.json"
+TEST_STATE_PATH = PROJECT_ROOT / "state.test.json"
+STATE_MODE_ENV = "QUIZ_STATE_MODE"
+
+
+def get_state_path() -> Path:
+    """실행 모드에 맞는 실제 또는 테스트 상태 파일 경로를 반환한다."""
+    state_mode = os.getenv(STATE_MODE_ENV, "real").strip().casefold()
+    if state_mode == "real":
+        return DEFAULT_STATE_PATH
+    if state_mode == "test":
+        return TEST_STATE_PATH
+    raise ValueError(f"{STATE_MODE_ENV}는 real 또는 test여야 합니다.")
 
 
 class QuizGame:
@@ -30,7 +43,7 @@ class QuizGame:
         # 전달받은 목록을 복사해 게임 밖의 목록 변경과 상태를 분리한다.
         self.quizzes = list(quizzes) if quizzes is not None else []
         self.best_scores: dict[str, int] = {}
-        self.state_path = state_path or DEFAULT_STATE_PATH
+        self.state_path = state_path or get_state_path()
 
         # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.
         self.input = input_func

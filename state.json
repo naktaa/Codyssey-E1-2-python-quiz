@@ -43,31 +43,7 @@
         "장영실"
       ],
       "answer": 2
-    },
-    {
-      "category": "1",
-      "question": "da",
-      "choices": [
-        "a",
-        "s",
-        "w",
-        "q"
-      ],
-      "answer": 1
-    },
-    {
-      "category": "1",
-      "question": "sdq",
-      "choices": [
-        "q",
-        "w",
-        "e",
-        "r"
-      ],
-      "answer": 1
     }
   ],
-  "best_scores": {
-    "과학": 100
-  }
+  "best_scores": {}
 }

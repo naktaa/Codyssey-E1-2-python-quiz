@@ -120,3 +120,30 @@ QUIZ_STATE_MODE=test py
 - 관련 커밋: `103a3b1 Fix: 손상된 상태 파일 백업과 복구 처리`
 - 재발 방지: 상태 데이터를 객체로 사용하기 전에 `validate_state_data()`에서
   최상위 구조와 각 필드 형식을 검증하고, 손상 원본은 복구 전에 별도 백업한다.
+
+---
+
+## 2026-08-06 — 추적 중인 state.json의 히스토리 필드 누락
+
+- 관련 요구사항: `BONUS-05`, `DATA-02`
+- 환경: Linux / bash / Python 3.12.3 격리 복사본
+- 확인 동작: `state.json` 내용과 히스토리 구현 커밋 `4da450f` 비교
+- 증상: 코드와 README는 `score_history`를 사용하지만 Git에 추적된
+  `state.json`에는 해당 필드가 없었다.
+- 원인: 히스토리 구현 시 기존 JSON에 필드가 없어도 빈 목록으로 읽는 호환 코드는
+  추가했지만, 저장소의 기본 `state.json` 자체는 갱신하지 않았다.
+- 해결: `state.json`에 `"score_history": []`를 추가하고 기존 파일 호환 처리는
+  그대로 유지했다.
+- 재검증 명령:
+
+```bash
+python3 -m json.tool state.json
+python3 -m compileall -q main.py src
+```
+
+- 재검증 결과: JSON·Python 문법 확인 성공, 격리 복사본에서 플레이 기록 저장과
+  재실행 복원 성공
+- 관련 변경 파일: `state.json`, `src/game_manager.py`, `README.md`
+- 관련 커밋: `81dddf1 Refactor: 테스트 기록 정리와 점수·히스토리 표시 개선`
+- 재발 방지: JSON 스키마 필드를 추가할 때 불러오기 호환 코드와 저장소의 기본
+  상태 파일을 함께 대조한다.

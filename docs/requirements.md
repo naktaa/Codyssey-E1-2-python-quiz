@@ -73,6 +73,6 @@
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 직접 실행해 순서 변화 확인 | 실행 로그 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 구현 완료 |
 | BONUS-02 | 풀이 문제 수 선택 | 선택 | `select_quiz_count()`·`play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 구현 완료 |
-| BONUS-03 | 힌트와 점수 차감 | 선택 | `ask_for_hint()`·`show_hint()`·`play_quizzes()` | 힌트 사용 전후 누적 점수와 사용 횟수 확인 | 실행 로그 | 선택 | `Feat: 힌트와 점수 차감 추가` | 구현 완료 |
+| BONUS-03 | 힌트와 점수 차감 | 선택 | 예정: `Quiz.hint`·`ask_for_hint()`·`show_hint()`·`play_quizzes()` | 문제별 저장 힌트와 사용 전후 누적 점수 확인 | 실행 로그 | 선택 | `Feat: 문제별 힌트 저장 방식 개선` | 현재 후보형 구현 완료, 저장형으로 변경 예정 |
 | BONUS-04 | 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 구현 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `record_game_result()`·`show_score_history()`·JSON 스키마 | 6회 이상 플레이 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |

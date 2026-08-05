@@ -1142,3 +1142,65 @@ python3 -m json.tool state.json
 
 - 별도 단계에서 최종 기능 실행, 영속성, Git 그래프와 clone·pull 증거를
   원문 로그·캡처로 확보한다.
+
+---
+
+## 2026-08-06 — 테스트 기록 정리와 점수·히스토리 표시 개선
+
+- 환경: Linux / bash / Python 3.12.3 격리 복사본
+- 브랜치: `main`
+- 목표: 현재 기능과 맞지 않는 테스트 자료를 정리하고 점수·히스토리 출력과
+  추적 JSON 스키마를 현재 구현에 맞춘다.
+- 요구사항: `FUNC-07`, `DATA-02`, `BONUS-03`, `BONUS-05`
+
+### 변경 파일
+
+- `tests/`: 기존 유닛테스트 파일과 디렉터리 전체 삭제
+- `AGENTS.md`, `README.md`, `docs/*.md`: 유닛테스트 정책·파일·실행 결과 기록 제거
+- `src/game_manager.py`: 결과와 최근 기록에서 만점 없이 획득 점수만 출력
+- `state.json`: 빈 `score_history` 목록을 기본 스키마에 추가
+- `README.md`: 표준 `python3 main.py` 실행 명령과 현재 점수 표시 방식 반영
+- `docs/progress.md`, `docs/requirements.md`: 현재 상태와 다음 수정 작업 반영
+- `docs/troubleshooting.md`: 히스토리 필드 누락 원인과 해결 기록
+
+### 구현과 확인 결과
+
+- 점수 계산과 최고 점수 비교는 기존 원점수 방식을 유지했다.
+- `max_score`는 플레이 기록 검증을 위해 JSON 내부에 유지하고 화면에서는 숨겼다.
+- 히스토리 커밋 `4da450f`는 정상 병합됐으며 `state.json` 갱신만 누락된 것을
+  Git 이력으로 확인했다.
+- 유닛테스트 관련 문구와 파일 참조가 남아 있지 않은지 전체 텍스트를 확인했다.
+- 필수 제출 증거 파일은 만들거나 변경하지 않았다.
+
+### 실행 명령과 실제 결과
+
+다음 플레이·문법 확인 명령은 원본 상태를 바꾸지 않도록 격리 복사본에서
+실행했고, `git diff --check`는 원본 저장소에서 실행했다.
+
+```bash
+python3 -m compileall -q main.py src
+python3 -m json.tool state.json
+printf '1\n2\n1\n2\n1\n3\n6\n' | python3 main.py
+printf '3\n6\n' | python3 main.py
+git diff --check
+```
+
+- Python 문법과 JSON 문법이 정상임을 확인했다.
+- 결과 화면과 최근 기록에 획득 점수만 표시됐다.
+- 플레이 기록이 JSON에 저장되고 재실행 후 다시 표시됐다.
+- `git diff --check`가 출력 없이 통과했다.
+
+### Git 상태
+
+- 구현 커밋: `81dddf1 Refactor: 테스트 기록 정리와 점수·히스토리 표시 개선`
+- 구현 push: `origin/main`에 완료
+- 현재 작업 기록과 다음 작업 문서 갱신: 미커밋
+- 문서 갱신 권장 커밋 메시지:
+  `Docs: 현재 작업 기록과 다음 개선 사항 갱신`
+
+### 다음 작업
+
+1. `Quiz`와 JSON에 문제별 힌트 문장을 저장하고 `show_hint()`가 해당 문장을
+   출력하도록 변경한다.
+2. 퀴즈 추가 직후 저장에 실패했을 때 새 퀴즈를 메모리에 유지할지 제거할지
+   결정하고 `add_quiz()`의 실패 처리를 정리한다.

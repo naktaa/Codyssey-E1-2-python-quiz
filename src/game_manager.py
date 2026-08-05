@@ -36,7 +36,8 @@ class QuizGame:
         2: "퀴즈 추가",
         3: "퀴즈 목록 보기",
         4: "카테고리별 최고 점수",
-        5: "종료",
+        5: "퀴즈 삭제",
+        6: "종료",
     }
 
     def __init__(
@@ -258,6 +259,69 @@ class QuizGame:
                 )
                 self.output(f"{number}. {quiz.question}  {choices}")
 
+    def delete_quiz(self) -> bool:
+        """선택한 퀴즈를 확인 후 삭제하고 상태 파일에 저장한다."""
+        if not self.quizzes:
+            self.output("등록된 퀴즈가 없습니다.")
+            return False
+
+        self.output("\n=== 퀴즈 삭제 ===")
+        category = self.select_category()
+        if category is None:
+            return False
+
+        category_quizzes = [
+            quiz
+            for quiz in self.quizzes
+            if quiz.category.casefold() == category.casefold()
+        ]
+        self.output("\n=== 삭제할 문제 선택 ===")
+        for number, quiz in enumerate(category_quizzes, start=1):
+            self.output(f"{number}. {quiz.question}")
+
+        choice = self.read_int(
+            "삭제할 문제 번호를 입력하세요: ",
+            1,
+            len(category_quizzes),
+        )
+        selected_quiz = category_quizzes[choice - 1]
+        self.output(f"삭제할 문제: {selected_quiz.question}")
+        self.output("정말 삭제하시겠습니까?")
+        self.output("1. 삭제")
+        self.output("2. 취소")
+        confirmation = self.read_int("선택하세요: ", 1, 2)
+        if confirmation == 2:
+            self.output("퀴즈 삭제를 취소했습니다.")
+            return False
+
+        quiz_index = next(
+            index
+            for index, quiz in enumerate(self.quizzes)
+            if quiz is selected_quiz
+        )
+        previous_scores = self.best_scores.copy()
+        self.quizzes.pop(quiz_index)
+
+        category_exists = any(
+            quiz.category.casefold() == category.casefold()
+            for quiz in self.quizzes
+        )
+        if not category_exists:
+            self.best_scores = {
+                score_category: score
+                for score_category, score in self.best_scores.items()
+                if score_category.casefold() != category.casefold()
+            }
+
+        if self.save_state():
+            self.output("퀴즈를 삭제하고 저장했습니다.")
+            return True
+
+        self.quizzes.insert(quiz_index, selected_quiz)
+        self.best_scores = previous_scores
+        self.output("파일에 저장하지 못해 퀴즈 삭제를 취소했습니다.")
+        return False
+
     def get_categories(self) -> list[str]:
         """퀴즈에 처음 등장한 순서대로 중복 없는 카테고리를 반환한다."""
         categories: list[str] = []
@@ -272,7 +336,7 @@ class QuizGame:
         return categories
 
     def select_category(self) -> str | None:
-        """플레이할 카테고리를 번호로 선택하고 퀴즈가 없으면 None을 반환한다."""
+        """카테고리를 번호로 선택하고 퀴즈가 없으면 None을 반환한다."""
         categories = self.get_categories()
         if not categories:
             self.output("등록된 퀴즈가 없습니다.")
@@ -406,9 +470,9 @@ class QuizGame:
         try:
             while True:
                 self.show_menu()
-                choice = self.read_int("메뉴를 선택하세요: ", 1, 5)
+                choice = self.read_int("메뉴를 선택하세요: ", 1, 6)
 
-                if choice == 5:
+                if choice == 6:
                     self.safe_exit()
                     return
 
@@ -420,6 +484,8 @@ class QuizGame:
                     self.list_quizzes()
                 elif choice == 4:
                     self.show_best_scores()
-        # 메뉴, 퀴즈 추가, 플레이 중 발생한 입력 중단을 함께 처리한다.
+                elif choice == 5:
+                    self.delete_quiz()
+        # 모든 메뉴 기능에서 발생한 입력 중단을 함께 처리한다.
         except (KeyboardInterrupt, EOFError):
             self.safe_exit(interrupted=True)

@@ -979,3 +979,52 @@ python3 -m json.tool state.json
 ### 다음 작업
 
 - 삭제할 문제를 선택·확인하고 JSON에 즉시 반영하는 퀴즈 삭제 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 퀴즈 삭제와 JSON 즉시 반영 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 선택한 퀴즈를 확인 후 삭제하고 활성 상태 파일에 즉시 반영
+- 요구사항: `BONUS-04`
+
+### 변경 파일
+
+- `src/game_manager.py`: 삭제 메뉴와 `delete_quiz()` 구현
+- `README.md`: 삭제 기능·메서드·저장 시점 반영
+- `docs/requirements.md`: BONUS-04 구현 완료 반영
+- `docs/progress.md`: 삭제 기능과 다음 점수 히스토리 작업 기록
+- `docs/architecture-plan.md`: 메뉴와 삭제 흐름 갱신
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 메인 메뉴의 5번을 퀴즈 삭제, 6번을 종료로 변경했다.
+- 삭제할 카테고리와 해당 카테고리의 문제 번호를 공통 숫자 입력으로 선택한다.
+- 선택한 문제 내용을 다시 출력하고 삭제 또는 취소를 입력받는다.
+- 삭제 확인 후 `save_state()`로 활성 상태 파일에 즉시 저장한다.
+- 카테고리의 마지막 문제를 삭제하면 해당 카테고리의 최고 점수도 제거한다.
+- 저장에 실패하면 퀴즈 목록과 최고 점수를 삭제 전 메모리 상태로 되돌린다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-delete-quiz-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이며 기존 퀴즈와 최고 점수 내용은 변경하지 않았다.
+- 실제 삭제·취소·재실행 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 날짜와 시간을 포함하는 점수 기록 히스토리의 저장 구조와 표시 방식을 설계한다.

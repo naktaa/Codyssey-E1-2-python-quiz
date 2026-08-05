@@ -2,11 +2,12 @@
 
 ## 현재 단계
 
-- 단계: JSON 저장·불러오기와 손상 파일 복구 구현 완료, 정상 영속성 직접 검증 전
+- 단계: JSON 저장·불러오기와 손상 복구 구현 완료, 최고 점수 영속성 확인 완료
 - 현재 브랜치: `state-json` (`origin/state-json` 추적)
-- 현재 HEAD: `103a3b1 Fix: 손상된 상태 파일 백업과 복구 처리`
-- 작업 시작 시 상태: 작업 트리 깨끗함, 로컬·원격 `state-json` 동기화
-- 커밋 수: 현재 브랜치 23개, `main` 20개
+- 이번 영속성 검증 시작 기준 HEAD:
+  `02b454a Docs: JSON 구현과 검증 기록 정리`
+- 검증 시작 시 상태: 작업 트리 깨끗함, 로컬·원격 `state-json` 동기화
+- 위 커밋 기준 커밋 수: 현재 브랜치 24개, `main` 20개
 - `main` 기준: `533b98f Docs: 로그 형식 정리`
 - 병합 상태: `state-json`의 3개 커밋은 아직 `main`에 병합하지 않음
 
@@ -74,14 +75,23 @@
 - 증거: [`../evidence/logs/memory-persistence-test.md`](../evidence/logs/memory-persistence-test.md)
 - 이 로그는 현재 동작의 증거가 아니라 JSON 적용 전 비교 기준이다.
 
-### 2. JSON 정상 저장·불러오기 — 코드 구현 완료, 직접 재실행 미검증
+### 2. JSON 최고 점수 영속성 — 직접 재실행 확인 완료
 
 - 퀴즈와 점수의 저장·불러오기 코드는 연결되어 있다.
 - 테스트 데이터가 실제 `state.json`에 섞이지 않도록 실행 모드도 분리했다.
-- 아직 추가·플레이·종료·재실행 후 목록과 최고 점수가 유지되는 전체 원본 로그는
-  확보하지 않았다.
+- 사용자가 확인용 파일에서 플레이 전 과학 `기록 없음`을 확인했다.
+- 과학 문제 2개를 모두 맞혀 100점을 만든 뒤 정상 종료했다.
+- 같은 명령으로 재실행해 과학 최고 점수 `100점`이 복원되는 것을 확인했다.
+- 원본 로그: [`../evidence/logs/persistence-restart.md`](../evidence/logs/persistence-restart.md)
+- `state.test.json`에는 `"과학": 100`이 남았고 실제 `state.json`의 Git diff는 없었다.
 
-### 3. JSON 손상 복구 — 직접 실행과 증거 확보 완료
+### 3. 추가 퀴즈 영속성 — 코드 구현 완료, 직접 재실행 미검증
+
+- `add_quiz()`는 추가 직후 활성 상태 파일을 저장하도록 연결되어 있다.
+- 이번 사용자 로그에는 새 퀴즈 추가와 재실행 후 목록 확인이 포함되지 않았다.
+- 퀴즈 추가·종료·재실행·목록 확인 원본 로그가 추가로 필요하다.
+
+### 4. JSON 손상 복구 — 직접 실행과 증거 확보 완료
 
 - 사용자가 `QUIZ_STATE_MODE=test py`로 직접 실행했다.
 - `quizzes`를 `quizes`로 잘못 적은 확인용 JSON에서
@@ -98,10 +108,11 @@
 - 초기 저장소 설정과 `main` push 완료
 - `feature/solving`에서 퀴즈 플레이를 구현하고 `cb4f9cb`에서 `main` 병합 완료
 - 퀴즈 추가, 안전 종료, 목록, 최고 점수 기능을 `main`에서 기능별 커밋
-- `state-json`에서 다음 3개 커밋 완료 및 원격 동기화
+- `state-json`에서 JSON 기능 3개 커밋과 문서 정리 커밋 완료 및 원격 동기화
   - `45990d1 Feat: state.json 저장과 불러오기 구현`
   - `40fdea5 Feat: 실행 모드별 상태 파일 분리`
   - `103a3b1 Fix: 손상된 상태 파일 백업과 복구 처리`
+  - `02b454a Docs: JSON 구현과 검증 기록 정리`
 - 최종 Git 그래프와 clone·pull 증거는 모든 기능과 `main` 병합이 끝난 뒤 정리
 
 ## 확보한 증거
@@ -113,12 +124,13 @@
 - 안전 종료: `evidence/logs/safe-exit.md`, `evidence/screenshots/safe-exit.png`
 - 퀴즈 목록: `evidence/screenshots/quiz-list.png`
 - 최고 점수: `evidence/logs/best-score.md`
+- 최고 점수 재실행 유지: `evidence/logs/persistence-restart.md`
 - JSON 복구: `evidence/logs/json-recovery.md`, `evidence/screenshots/json-recovery.png`
 
 ## 미검증·미완료
 
 - 기본 퀴즈가 현재 4개이므로 필수 기준인 5개 이상 미충족
-- JSON 적용 후 추가 퀴즈와 최고 점수의 종료·재실행 유지 직접 검증
+- JSON 적용 후 추가 퀴즈의 종료·재실행 유지 직접 검증
 - JSON 저장 중 실제 읽기·쓰기 OS 오류 직접 재현
 - 빈 퀴즈 상태의 플레이·목록·점수 화면 최종 직접 확인
 - `state-json`을 `main`에 병합
@@ -129,13 +141,13 @@
 
 ## 다음 권장 작업 하나
 
-확인용 상태에서 정상 데이터 영속성을 사용자 직접 실행으로 검증한다.
+확인용 상태에서 추가 퀴즈의 재실행 영속성을 사용자 직접 실행으로 검증한다.
 
 1. `QUIZ_STATE_MODE=test py`로 실행한다.
-2. 퀴즈 하나를 추가하고 카테고리를 플레이해 최고 점수를 만든다.
+2. 퀴즈 하나를 추가한다.
 3. 종료한 뒤 같은 명령으로 다시 실행한다.
-4. 메뉴 3에서 추가 문제, 메뉴 4에서 최고 점수가 유지되는지 확인한다.
-5. 전체 터미널 원문을 `evidence/logs/persistence-restart.md`로 기록한다.
+4. 메뉴 3에서 추가 문제가 유지되는지 확인한다.
+5. 전체 터미널 원문을 기존 `evidence/logs/persistence-restart.md`에 이어 기록한다.
 
 정상 기준은 실제 `state.json`이 바뀌지 않고, `state.test.json`에만 추가 문제와
-점수가 저장되며 재실행 후 같은 값이 표시되는 것이다.
+기존 100점이 저장되며 재실행 후 추가 문제가 표시되는 것이다.

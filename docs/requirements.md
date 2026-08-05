@@ -5,6 +5,7 @@
 - `예정`: 아직 작업하지 않음
 - `구현 중`: 현재 수정 중
 - `구현 완료`: 코드 또는 문서 작성 완료
+- `부분 검증`: 요구사항의 일부 동작만 직접 확인
 - `실행 검증 완료`: 실제 명령으로 정상 동작 확인
 - `증거 확보 완료`: 로그 또는 스크린샷 확보
 - `문서 반영 완료`: README와 관련 문서에 최종 반영
@@ -58,7 +59,7 @@
 | DATA-04 | 파일이 없으면 기본 퀴즈 사용 | 필수 | `load_state()` | 확인용 상태 파일이 없는 첫 실행 | 최종 검증 로그 | 11 | `Feat: state.json 저장과 불러오기 구현` | 구현 완료 |
 | DATA-05 | 손상 파일 안내 후 백업하고 기본 데이터로 정상 실행 | 필수 | `validate_state_data()`·복구 메서드 | 잘못된 확인용 JSON으로 직접 실행 | [복구 연결 기록](../evidence/logs/json-recovery.md) | 12 | `Fix: 손상된 상태 파일 백업과 복구 처리` | 증거 확보 완료 |
 | DATA-06 | 읽기·쓰기 오류를 try/except로 처리 | 필수 | 저장·불러오기 메서드 | 코드 검토와 직접 오류 재현 | 최종 검증 로그 | 12 | `Fix: 데이터 입출력 예외 처리 보완` | 구현 완료 |
-| DATA-07 | 종료·재실행 후 추가 퀴즈와 최고 점수 유지 | 필수 | 전체 프로그램 | 확인용 상태에서 추가·플레이·종료·재실행 | persistence 스크린샷·원본 로그 | 13 | `Docs: 데이터 영속성 직접 검증 기록` | 구현 완료 |
+| DATA-07 | 종료·재실행 후 추가 퀴즈와 최고 점수 유지 | 필수 | 전체 프로그램 | 확인용 상태에서 추가·플레이·종료·재실행 | [재실행 원본 로그](../evidence/logs/persistence-restart.md)·추가 퀴즈 증거 | 13 | `Docs: 데이터 영속성 직접 검증 기록` | 부분 검증 |
 | DOC-01 | README에 프로젝트 개요 포함 | 필수 | `README.md` | 항목 확인 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-02 | README에 퀴즈 주제와 선정 이유 포함 | 필수 | `README.md` | 항목 확인 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-03 | README에 실제·확인용 실행 방법 포함 | 필수 | `README.md` | 그대로 따라 직접 실행 | 최종 검증 로그 | 14, 16 | `Docs: README와 제출 증거 정리` | 구현 완료 |
@@ -66,7 +67,7 @@
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-02 | 추가·목록·플레이·점수 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
-| EVID-03 | 재실행 데이터 유지 화면 확보 | 필수 | `evidence/screenshots/` | 종료 전후 비교 | `persistence-restart.png` | 13 | `Docs: README와 제출 증거 정리` | 예정 |
+| EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |
 | SEC-01 | 저장소·로그·스크린샷에 비밀값 없음 | 필수 | 전체 제출물 | 토큰·키·인증정보 점검 | 최종 체크 결과 | 16 | `Docs: 제출 전 비밀값 점검 기록` | 예정 |

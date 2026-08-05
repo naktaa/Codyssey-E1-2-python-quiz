@@ -33,9 +33,9 @@ class QuizGame:
 
     MENU_ITEMS = {
         1: "퀴즈 풀기",
-        2: "퀴즈 추가",
-        3: "퀴즈 목록 보기",
-        4: "카테고리별 최고 점수",
+        2: "퀴즈 목록 보기",
+        3: "카테고리별 최고 점수",
+        4: "퀴즈 추가",
         5: "퀴즈 삭제",
         6: "종료",
     }
@@ -92,6 +92,16 @@ class QuizGame:
                 return value
 
             self.output("입력값이 비어 있습니다. 내용을 입력해 주세요.")
+
+    def read_yes_no(self, prompt: str) -> bool:
+        """y 또는 n이 입력될 때까지 다시 입력받는다."""
+        while True:
+            answer = self.input(prompt).strip().casefold()
+            if answer == "y":
+                return True
+            if answer == "n":
+                return False
+            self.output("y 또는 n을 입력해 주세요.")
 
     def save_state(self) -> bool:
         """현재 퀴즈와 최고 점수를 UTF-8 JSON 파일에 저장한다."""
@@ -235,14 +245,13 @@ class QuizGame:
             self.output("퀴즈는 추가했지만 파일에는 저장하지 못했습니다.")
 
     def list_quizzes(self) -> None:
-        """퀴즈를 카테고리별로 묶어 한 줄 형식으로 출력한다."""
+        """퀴즈 질문을 카테고리별로 묶어 연속해서 출력한다."""
         if not self.quizzes:
             self.output("등록된 퀴즈가 없습니다.")
             return
 
         self.output("\n=== 퀴즈 목록 ===")
         for category in self.get_categories():
-            self.output("")
             self.output(f"[{category}]")
             category_quizzes = [
                 quiz
@@ -251,13 +260,7 @@ class QuizGame:
             ]
 
             for number, quiz in enumerate(category_quizzes, start=1):
-                if number > 1:
-                    self.output("")
-                choices = "  ".join(
-                    f"{choice_number}) {choice}"
-                    for choice_number, choice in enumerate(quiz.choices, start=1)
-                )
-                self.output(f"{number}. {quiz.question}  {choices}")
+                self.output(f"{number}. {quiz.question}")
 
     def delete_quiz(self) -> bool:
         """선택한 퀴즈를 확인 후 삭제하고 상태 파일에 저장한다."""
@@ -286,11 +289,7 @@ class QuizGame:
         )
         selected_quiz = category_quizzes[choice - 1]
         self.output(f"삭제할 문제: {selected_quiz.question}")
-        self.output("정말 삭제하시겠습니까?")
-        self.output("1. 삭제")
-        self.output("2. 취소")
-        confirmation = self.read_int("선택하세요: ", 1, 2)
-        if confirmation == 2:
+        if not self.read_yes_no("정말 삭제하시겠습니까? (y/n): "):
             self.output("퀴즈 삭제를 취소했습니다.")
             return False
 
@@ -479,11 +478,11 @@ class QuizGame:
                 if choice == 1:
                     self.play_quizzes()
                 elif choice == 2:
-                    self.add_quiz()
-                elif choice == 3:
                     self.list_quizzes()
-                elif choice == 4:
+                elif choice == 3:
                     self.show_best_scores()
+                elif choice == 4:
+                    self.add_quiz()
                 elif choice == 5:
                     self.delete_quiz()
         # 모든 메뉴 기능에서 발생한 입력 중단을 함께 처리한다.

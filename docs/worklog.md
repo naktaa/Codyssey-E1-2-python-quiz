@@ -1028,3 +1028,52 @@ python3 -m json.tool state.json
 ### 다음 작업
 
 - 날짜와 시간을 포함하는 점수 기록 히스토리의 저장 구조와 표시 방식을 설계한다.
+
+---
+
+## 2026-08-05 — 메뉴·목록·삭제 확인 방식 정리
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 관련 메뉴를 묶고 목록과 삭제 입력을 간결하게 개선
+
+### 변경 파일
+
+- `src/game_manager.py`: 메뉴 순서, 질문 전용 목록과 `read_yes_no()` 반영
+- `README.md`: 최종 메뉴·목록·삭제 동작과 과거 목록 증거 구분
+- `docs/requirements.md`: BONUS-04 직접 확인 상태와 `y/n` 입력 반영
+- `docs/progress.md`: 현재 출력과 입력 방식 반영
+- `docs/architecture-plan.md`: 메뉴와 세부 기능 흐름 갱신
+- `docs/worklog.md`: 변경 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- 메뉴를 풀기, 목록, 최고 점수, 추가, 삭제, 종료 순서로 재배치했다.
+- 추가와 삭제가 각각 4번과 5번에 이어서 표시된다.
+- 퀴즈 목록에서는 답안 선택지를 숨기고 카테고리별 질문만 연속 표시한다.
+- 삭제 대상은 기존대로 카테고리 번호와 문제 번호로 선택한다.
+- 마지막 삭제 확인은 숫자 메뉴 대신 `y/n`으로 처리한다.
+- `read_yes_no()`는 앞뒤 공백과 대소문자를 정리하고 다른 입력은 다시 받는다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-menu-list-delete-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이며 저장 데이터는 변경하지 않았다.
+- 변경된 메뉴와 목록은 사용자 환경에서 직접 확인한다.
+- 삭제 기능의 정상 동작은 사용자가 직접 확인했다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 날짜와 시간을 포함하는 점수 기록 히스토리의 저장 구조와 표시 방식을 설계한다.

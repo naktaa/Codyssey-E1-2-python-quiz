@@ -38,6 +38,8 @@ htmlcov/
 
 # Keep mission evidence and state.json trackable
 state.test.json
+state.json.corrupt-*
+state.test.json.corrupt-*
 !state.json
 !evidence/
 !evidence/**

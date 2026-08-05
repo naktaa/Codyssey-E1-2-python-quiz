@@ -1,6 +1,8 @@
 import json
 import os
+import shutil
 from collections.abc import Callable
+from datetime import datetime
 from pathlib import Path
 
 from .quiz import Quiz
@@ -42,8 +44,10 @@ class QuizGame:
     ) -> None:
         # 전달받은 목록을 복사해 게임 밖의 목록 변경과 상태를 분리한다.
         self.quizzes = list(quizzes) if quizzes is not None else []
+        self._default_quizzes = list(self.quizzes)
         self.best_scores: dict[str, int] = {}
         self.state_path = state_path or get_state_path()
+        self._state_save_enabled = True
 
         # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.
         self.input = input_func
@@ -86,6 +90,10 @@ class QuizGame:
 
     def save_state(self) -> bool:
         """현재 퀴즈와 최고 점수를 UTF-8 JSON 파일에 저장한다."""
+        if not self._state_save_enabled:
+            self.output("원본 상태 파일을 보호하기 위해 저장하지 않았습니다.")
+            return False
+
         state = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_scores": self.best_scores,
@@ -98,19 +106,25 @@ class QuizGame:
                 file.write("\n")
             temp_path.replace(self.state_path)
         except OSError as error:
-            self.output(f"상태 파일을 저장하지 못했습니다: {error}")
+            self.remove_temp_state(temp_path)
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            self.output(f"상태 파일을 저장하지 못했습니다: {error_message}")
             return False
 
         return True
 
-    def load_state(self) -> bool:
-        """상태 파일이 있으면 퀴즈와 최고 점수를 복원한다."""
-        if not self.state_path.exists():
-            return self.save_state()
+    def remove_temp_state(self, temp_path: Path) -> None:
+        """저장 실패 후 남은 임시 상태 파일을 가능한 범위에서 정리한다."""
+        try:
+            temp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
 
-        with self.state_path.open("r", encoding="utf-8") as file:
-            state = json.load(file)
-
+    def validate_state_data(
+        self,
+        state: object,
+    ) -> tuple[list[Quiz], dict[str, int]]:
+        """불러온 JSON 구조를 검증해 게임 상태로 변환한다."""
         if not isinstance(state, dict):
             raise ValueError("상태 데이터는 객체 형식이어야 합니다.")
 
@@ -131,6 +145,60 @@ class QuizGame:
             if not 0 <= score <= 100:
                 raise ValueError("최고 점수는 0부터 100 사이여야 합니다.")
             loaded_scores[category.strip()] = score
+
+        return loaded_quizzes, loaded_scores
+
+    def backup_corrupted_state(self) -> Path | None:
+        """손상된 상태 파일을 timestamp가 붙은 이름으로 복사한다."""
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        backup_path = self.state_path.with_name(
+            f"{self.state_path.name}.corrupt-{timestamp}"
+        )
+        try:
+            shutil.copy2(self.state_path, backup_path)
+        except OSError as error:
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            self.output(f"손상된 상태 파일을 백업하지 못했습니다: {error_message}")
+            return None
+        return backup_path
+
+    def recover_corrupted_state(self) -> bool:
+        """손상 원본을 백업하고 기본 상태 파일을 만든다."""
+        backup_path = self.backup_corrupted_state()
+        if backup_path is None:
+            self._state_save_enabled = False
+            self.output("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
+            return False
+
+        self.quizzes = list(self._default_quizzes)
+        self.best_scores = {}
+        self.output(f"손상된 상태 파일을 백업했습니다: {backup_path.name}")
+
+        if self.save_state():
+            self.output("기본 데이터로 상태 파일을 복구했습니다.")
+            return True
+
+        self.output("기본 데이터로 실행하지만 상태 파일은 복구하지 못했습니다.")
+        return False
+
+    def load_state(self) -> bool:
+        """상태 파일이 있으면 퀴즈와 최고 점수를 복원한다."""
+        if not self.state_path.exists():
+            return self.save_state()
+
+        try:
+            with self.state_path.open("r", encoding="utf-8") as file:
+                state = json.load(file)
+            loaded_quizzes, loaded_scores = self.validate_state_data(state)
+        except OSError as error:
+            self._state_save_enabled = False
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            self.output(f"상태 파일을 불러오지 못했습니다: {error_message}")
+            self.output("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
+            return False
+        except (json.JSONDecodeError, UnicodeError, TypeError, ValueError) as error:
+            self.output(f"상태 파일이 손상되었습니다: {error}")
+            return self.recover_corrupted_state()
 
         self.quizzes = loaded_quizzes
         self.best_scores = loaded_scores

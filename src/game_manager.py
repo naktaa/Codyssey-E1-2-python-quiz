@@ -170,7 +170,30 @@ class QuizGame:
         self.output("\n=== 퀴즈 결과 ===")
         self.output(f"정답 수: {correct_count}/{total_count}")
         self.output(f"점수: {score}점")
+        if self.update_best_score(category, score):
+            self.output(f"새로운 최고 점수: {score}점")
         return score
+
+    def update_best_score(self, category: str, score: int) -> bool:
+        """기존 기록보다 높은 카테고리 점수만 저장한다."""
+        previous_score = self.best_scores.get(category)
+        if previous_score is None or score > previous_score:
+            self.best_scores[category] = score
+            return True
+        return False
+
+    def show_best_scores(self) -> None:
+        """카테고리별 최고 점수 또는 기록 없음 상태를 출력한다."""
+        categories = self.get_categories()
+        if not categories:
+            self.output("등록된 퀴즈가 없습니다.")
+            return
+
+        self.output("\n=== 카테고리별 최고 점수 ===")
+        for category in categories:
+            score = self.best_scores.get(category)
+            score_text = "기록 없음" if score is None else f"{score}점"
+            self.output(f"{category}: {score_text}")
 
     def safe_exit(self, interrupted: bool = False) -> None:
         """정상 종료와 입력 중단 종료의 안내를 한곳에서 처리한다."""
@@ -196,10 +219,8 @@ class QuizGame:
                     self.add_quiz()
                 elif choice == 3:
                     self.list_quizzes()
-                else:
-                    self.output(
-                        f"[{self.MENU_ITEMS[choice]}] 기능은 아직 구현되지 않았습니다."
-                    )
+                elif choice == 4:
+                    self.show_best_scores()
         # 메뉴, 퀴즈 추가, 플레이 중 발생한 입력 중단을 함께 처리한다.
         except (KeyboardInterrupt, EOFError):
             self.safe_exit(interrupted=True)

@@ -769,3 +769,60 @@ QUIZ_STATE_MODE=test py
 ### 다음 작업
 
 - 확인용 상태에서 퀴즈 하나를 추가하고 종료·재실행 후 목록에 유지되는지 확인한다.
+
+---
+
+## 2026-08-05 — 기본 상식 퀴즈 5개 충족
+
+- 환경: macOS / zsh
+- 브랜치: `main`
+- 목표: 필수 요구사항인 직접 작성 기본 퀴즈 5개 이상 충족
+- 요구사항: `DATA-01`
+
+### 변경 파일
+
+- `src/default_quizzes.py`: 과학 기본 문제 1개 추가, 임시 데이터 설명 제거
+- `state.json`: 동일한 과학 문제를 추가해 기본 생성 데이터와 실제 상태 일치
+- `README.md`: `main` JSON 병합과 기본 문제 5개 상태 반영
+- `docs/requirements.md`: DATA-01 구현 완료 반영
+- `docs/progress.md`: 필수 데이터 완료와 다음 보너스 작업 반영
+- `docs/worklog.md`: 실제 변경과 확인 결과 기록
+
+### 추가 문제
+
+```text
+카테고리: 과학
+문제: 태양계에서 가장 큰 행성은 무엇인가요?
+선택지: 지구, 화성, 목성, 금성
+정답: 3번 목성
+```
+
+### 확인 명령과 실제 결과
+
+```zsh
+python main.py
+py
+python3 --version
+python3 -m json.tool state.json
+rg -c '^[[:space:]]*Quiz\(' src/default_quizzes.py
+rg -c '"question"' state.json
+```
+
+- 도구 셸에는 사용자 `python`, `py` 별칭이 없어 두 직접 실행 명령은 시작되지 않았다.
+- 도구 셸의 `/usr/bin/python3`는 요구 버전보다 낮은 Python 3.9.6이라 게임 실행에
+  사용하지 않았다.
+- `python3 -m json.tool state.json`은 성공해 JSON 문법이 정상임을 확인했다.
+- `src/default_quizzes.py`의 `Quiz` 생성 수와 `state.json`의 문제 수가 각각
+  5개로 일치했다.
+- unittest는 실행하거나 수정하지 않았다.
+- 최종 메뉴 화면은 사용자의 Python 3.12.13 환경에서 직접 확인한다.
+
+### Git 상태
+
+- 작업 시작: `main`과 `origin/main`이
+  `4984e31 Merge: JSON 상태 관리 브랜치 병합`에서 동기화
+- commit·push: 이번 사용자 요청 범위에서 기능 확인 후 함께 수행
+
+### 다음 작업
+
+- 보너스 기능의 기반이 되는 풀이 문제 수 선택 기능을 구현한다.

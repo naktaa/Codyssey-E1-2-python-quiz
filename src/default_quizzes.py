@@ -2,8 +2,7 @@ from .quiz import Quiz
 
 
 def get_default_quizzes() -> list[Quiz]:
-    """직접 플레이를 확인할 임시 기본 퀴즈의 새 목록을 반환한다."""
-    # 최종 제출 전 사용자가 준비한 상식 퀴즈 5개 이상으로 교체한다.
+    """상식 퀴즈의 기본 문제 목록을 새 객체로 반환한다."""
     return [
         Quiz(
             category="과학",
@@ -28,5 +27,11 @@ def get_default_quizzes() -> list[Quiz]:
             question="조선을 건국한 인물은 누구인가요?",
             choices=["이순신", "이성계", "강감찬", "장영실"],
             answer=2,
+        ),
+        Quiz(
+            category="과학",
+            question="태양계에서 가장 큰 행성은 무엇인가요?",
+            choices=["지구", "화성", "목성", "금성"],
+            answer=3,
         ),
     ]

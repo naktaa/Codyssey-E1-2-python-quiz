@@ -38,8 +38,8 @@
 | FUNC-09 | 새 퀴즈의 문제·선택지 4개·정답 입력 | 필수 | `src/game_manager.py` | 새 퀴즈 등록 | 추가 스크린샷 | 7 | `Feat: 퀴즈 등록 기능 구현` | 실행 검증 완료 |
 | FUNC-10 | 퀴즈 추가 입력 오류 처리 | 필수 | 입력 메서드 | 빈 문제·선택지, 잘못된 정답 입력 | 최종 검증 로그 | 7, 12 | `Feat: 퀴즈 등록 기능 구현` | 실행 검증 완료 |
 | FUNC-11 | 추가 직후 파일에 저장 | 필수 | 저장 메서드 | 등록 후 `state.json` 확인 | 추가·JSON 증거 | 7, 11 | `Feat: 퀴즈 등록 기능 구현` | 예정 |
-| FUNC-12 | 저장된 퀴즈 목록 확인 | 필수 | `src/game_manager.py` | 메뉴에서 목록 출력 | 목록 스크린샷 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 예정 |
-| FUNC-13 | 퀴즈가 없을 때 목록 안내 | 필수 | `src/game_manager.py` | 빈 목록 상태 테스트 | 최종 검증 로그 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 예정 |
+| FUNC-12 | 저장된 퀴즈 목록 확인 | 필수 | `src/game_manager.py` | 메뉴에서 목록 출력 | 목록 스크린샷 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 증거 확보 완료 |
+| FUNC-13 | 퀴즈가 없을 때 목록 안내 | 필수 | `src/game_manager.py` | 빈 목록 상태 테스트 | 최종 검증 로그 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 구현 완료 |
 | FUNC-14 | 최고 점수 조회 | 필수 | `src/game_manager.py` | 플레이 후 점수 메뉴 확인 | 점수 스크린샷 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 예정 |
 | FUNC-15 | 매 플레이 결과와 최고 점수 비교·갱신 | 필수 | `src/game_manager.py` | 낮은 점수·높은 점수 순서로 테스트 | 플레이·점수 증거 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 예정 |
 | FUNC-16 | 아직 플레이 전 상태 안내 | 필수 | `src/game_manager.py` | 초기 상태 점수 확인 | 최종 검증 로그 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 예정 |
@@ -57,7 +57,7 @@
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 state.json 경로·역할·스키마 포함 | 필수 | `README.md` | 실제 JSON과 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 구현 중 |
-| EVID-02 | 추가·목록·플레이·점수 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 예정 |
+| EVID-02 | 추가·목록·플레이·점수 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-03 | 재실행 데이터 유지 화면 확보 | 필수 | `evidence/screenshots/` | 종료 전후 비교 | `persistence-restart.png` | 13 | `Docs: README와 제출 증거 정리` | 예정 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |

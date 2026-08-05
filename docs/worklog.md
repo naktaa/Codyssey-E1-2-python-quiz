@@ -879,3 +879,52 @@ python3 -m json.tool state.json
 ### 다음 작업
 
 - 선택한 문제 수만큼 원본 목록을 바꾸지 않고 무작위 출제하는 기능을 구현한다.
+
+---
+
+## 2026-08-05 — 문제 선택과 출제 순서 무작위화
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 사용자가 선택한 문제 수만큼 중복 없이 뽑아 무작위 순서로 출제
+- 요구사항: `BONUS-01`
+
+### 변경 파일
+
+- `src/game_manager.py`: 표준 라이브러리 `random`과 `random.sample()` 연결
+- `README.md`: 무작위 선택·출제와 원본 순서 보존 설명
+- `docs/requirements.md`: BONUS-01 구현 완료 반영
+- `docs/progress.md`: 구현 상태와 다음 힌트 작업 반영
+- `docs/architecture-plan.md`: 변경된 플레이 흐름 기록
+- `docs/worklog.md`: 구현과 정적 확인 기록
+
+### 구현 내용
+
+- 카테고리 문제 객체 목록을 `random.sample()`의 모집단으로 전달한다.
+- `k`에는 사용자가 앞 단계에서 선택한 문제 수를 전달한다.
+- 반환된 새 목록은 선택된 문제와 순서가 모두 무작위이며 한 게임에서 중복이 없다.
+- 반환된 순서 그대로 문제 번호를 붙여 출제한다.
+- `self.quizzes` 원본 목록을 직접 섞거나 수정하지 않는다.
+- `state.json`을 다시 쓰지 않으므로 JSON의 저장 순서도 유지된다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-random-quiz-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 기본 문제 순서가 그대로임을 확인했다.
+- unittest는 실행하거나 수정하지 않았다.
+- 실제 문제 순서 변화는 사용자 Python 3.12.13 환경에서 직접 플레이해 확인한다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 힌트 제공 방식과 힌트 사용 시 점수 차감 기준을 확정한 뒤 구현한다.

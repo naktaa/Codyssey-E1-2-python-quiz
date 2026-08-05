@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import shutil
 from collections.abc import Callable
 from datetime import datetime
@@ -302,7 +303,8 @@ class QuizGame:
             if quiz.category.casefold() == category.casefold()
         ]
         quiz_count = self.select_quiz_count(category, len(selected_quizzes))
-        selected_quizzes = selected_quizzes[:quiz_count]
+        # 원본 저장 순서는 유지하고 이번 플레이의 출제 목록만 무작위로 만든다.
+        selected_quizzes = random.sample(selected_quizzes, k=quiz_count)
         correct_count = 0
 
         self.output(f"\n=== {category} 퀴즈 ===")

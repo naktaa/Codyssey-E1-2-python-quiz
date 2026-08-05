@@ -28,6 +28,9 @@ def get_state_path() -> Path:
 class QuizGame:
     """터미널 퀴즈 게임의 메뉴와 공통 입력을 관리한다."""
 
+    CORRECT_POINTS = 3
+    HINT_CORRECT_POINTS = 1
+
     MENU_ITEMS = {
         1: "퀴즈 풀기",
         2: "퀴즈 추가",
@@ -143,8 +146,8 @@ class QuizGame:
                 raise ValueError("최고 점수의 카테고리 이름이 올바르지 않습니다.")
             if isinstance(score, bool) or not isinstance(score, int):
                 raise ValueError("최고 점수는 정수여야 합니다.")
-            if not 0 <= score <= 100:
-                raise ValueError("최고 점수는 0부터 100 사이여야 합니다.")
+            if score < 0:
+                raise ValueError("최고 점수는 0 이상이어야 합니다.")
             loaded_scores[category.strip()] = score
 
         return loaded_quizzes, loaded_scores
@@ -291,6 +294,31 @@ class QuizGame:
             total_count,
         )
 
+    def show_hint(self, quiz: Quiz) -> None:
+        """정답과 오답 하나를 남긴 두 개의 정답 후보를 출력한다."""
+        wrong_numbers = [
+            number
+            for number in range(1, len(quiz.choices) + 1)
+            if number != quiz.answer
+        ]
+        hint_numbers = sorted([quiz.answer, random.choice(wrong_numbers)])
+        hint_choices = " 또는 ".join(
+            f"{number}) {quiz.choices[number - 1]}"
+            for number in hint_numbers
+        )
+        self.output(f"힌트: 정답 후보는 {hint_choices} 중 하나입니다.")
+
+    def ask_for_hint(self, quiz: Quiz) -> bool:
+        """힌트 사용 여부를 입력받고 사용 여부를 반환한다."""
+        self.output("힌트를 사용하시겠습니까?")
+        self.output("1. 힌트 보기")
+        self.output("2. 바로 풀기")
+        choice = self.read_int("선택하세요: ", 1, 2)
+        if choice == 1:
+            self.show_hint(quiz)
+            return True
+        return False
+
     def play_quizzes(self) -> int | None:
         """선택한 카테고리에서 지정한 수의 퀴즈를 출제한다."""
         category = self.select_category()
@@ -306,16 +334,27 @@ class QuizGame:
         # 원본 저장 순서는 유지하고 이번 플레이의 출제 목록만 무작위로 만든다.
         selected_quizzes = random.sample(selected_quizzes, k=quiz_count)
         correct_count = 0
+        hint_count = 0
+        score = 0
 
         self.output(f"\n=== {category} 퀴즈 ===")
         for number, quiz in enumerate(selected_quizzes, start=1):
             self.output("")
             quiz.display(output_func=self.output, number=number)
+            hint_used = self.ask_for_hint(quiz)
+            if hint_used:
+                hint_count += 1
             user_answer = self.read_int("정답 번호를 입력하세요: ", 1, 4)
 
             if quiz.is_correct(user_answer):
                 correct_count += 1
-                self.output("정답입니다!")
+                earned_points = (
+                    self.HINT_CORRECT_POINTS
+                    if hint_used
+                    else self.CORRECT_POINTS
+                )
+                score += earned_points
+                self.output(f"정답입니다! {earned_points}점을 획득했습니다.")
             else:
                 correct_choice = quiz.choices[quiz.answer - 1]
                 self.output(
@@ -323,10 +362,11 @@ class QuizGame:
                 )
 
         total_count = len(selected_quizzes)
-        score = round(correct_count / total_count * 100)
+        max_score = total_count * self.CORRECT_POINTS
         self.output("\n=== 퀴즈 결과 ===")
         self.output(f"정답 수: {correct_count}/{total_count}")
-        self.output(f"점수: {score}점")
+        self.output(f"힌트 사용: {hint_count}회")
+        self.output(f"점수: {score}/{max_score}점")
         if self.update_best_score(category, score):
             self.output(f"새로운 최고 점수: {score}점")
         return score

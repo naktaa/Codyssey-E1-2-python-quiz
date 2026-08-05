@@ -928,3 +928,54 @@ python3 -m json.tool state.json
 ### 다음 작업
 
 - 힌트 제공 방식과 힌트 사용 시 점수 차감 기준을 확정한 뒤 구현한다.
+
+---
+
+## 2026-08-05 — 수동 힌트와 누적 점수 구현
+
+- 환경: macOS / zsh
+- 브랜치: `feature/bonus`
+- 목표: 문제별 수동 힌트와 힌트 사용에 따른 차등 점수, 결과 집계 추가
+- 요구사항: `BONUS-03`
+
+### 변경 파일
+
+- `src/game_manager.py`: 힌트 선택·출력과 문제별 누적 점수 계산 추가
+- `README.md`: 힌트 동작, 점수 기준과 이전 기록 호환성 설명
+- `docs/requirements.md`: BONUS-03 구현 완료 반영
+- `docs/progress.md`: 구현 상태와 다음 퀴즈 삭제 작업 반영
+- `docs/architecture-plan.md`: 힌트 메서드와 플레이 흐름 갱신
+- `docs/worklog.md`: 구현 내용과 정적 확인 결과 기록
+
+### 구현 내용
+
+- `ask_for_hint()`가 각 문제에서 힌트 보기 또는 바로 풀기를 선택받는다.
+- `show_hint()`가 정답 하나와 무작위 오답 하나를 골라 두 개의 후보를 출력한다.
+- 힌트 없이 정답이면 3점, 힌트 사용 후 정답이면 1점, 오답이면 0점이다.
+- 힌트를 본 횟수는 정답 여부와 관계없이 `hint_count`에 누적한다.
+- 결과 화면은 정답 수, 힌트 사용 횟수와 `획득 점수/출제 문제 수 × 3점`을
+  출력한다.
+- 최고 점수 JSON 검증 범위를 0~100에서 0 이상의 정수로 변경했다.
+- 이전 100점 환산 최고 점수는 삭제하거나 변환하지 않고 그대로 불러온다.
+
+### 확인 명령과 실제 결과
+
+```zsh
+env PYTHONPYCACHEPREFIX=/private/tmp/codyssey-hint-score-pycache \
+  /usr/bin/python3 -m py_compile src/game_manager.py
+python3 -m json.tool state.json
+```
+
+- Python 문법 컴파일이 출력 없이 성공했다.
+- `state.json` 문법이 정상이고 `best_scores`가 빈 객체인 원본 상태를 확인했다.
+- 실제 메뉴 동작은 사용자 Python 3.12.13 환경에서 직접 확인한다.
+- unittest는 실행하거나 수정하지 않는다.
+
+### Git 상태
+
+- Git 명령은 사용자 지시에 따라 실행하지 않음
+- commit·push: 사용자 직접 수행
+
+### 다음 작업
+
+- 삭제할 문제를 선택·확인하고 JSON에 즉시 반영하는 퀴즈 삭제 기능을 구현한다.

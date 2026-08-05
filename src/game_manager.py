@@ -85,6 +85,31 @@ class QuizGame:
         )
         self.output("퀴즈를 추가했습니다.")
 
+    def list_quizzes(self) -> None:
+        """퀴즈를 카테고리별로 묶어 한 줄 형식으로 출력한다."""
+        if not self.quizzes:
+            self.output("등록된 퀴즈가 없습니다.")
+            return
+
+        self.output("\n=== 퀴즈 목록 ===")
+        for category in self.get_categories():
+            self.output("")
+            self.output(f"[{category}]")
+            category_quizzes = [
+                quiz
+                for quiz in self.quizzes
+                if quiz.category.casefold() == category.casefold()
+            ]
+
+            for number, quiz in enumerate(category_quizzes, start=1):
+                if number > 1:
+                    self.output("")
+                choices = "  ".join(
+                    f"{choice_number}) {choice}"
+                    for choice_number, choice in enumerate(quiz.choices, start=1)
+                )
+                self.output(f"{number}. {quiz.question}  {choices}")
+
     def get_categories(self) -> list[str]:
         """퀴즈에 처음 등장한 순서대로 중복 없는 카테고리를 반환한다."""
         categories: list[str] = []
@@ -169,6 +194,8 @@ class QuizGame:
                     self.play_quizzes()
                 elif choice == 2:
                     self.add_quiz()
+                elif choice == 3:
+                    self.list_quizzes()
                 else:
                     self.output(
                         f"[{self.MENU_ITEMS[choice]}] 기능은 아직 구현되지 않았습니다."

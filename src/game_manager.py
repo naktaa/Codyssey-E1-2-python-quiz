@@ -1,6 +1,12 @@
+import json
 from collections.abc import Callable
+from pathlib import Path
 
 from .quiz import Quiz
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_STATE_PATH = PROJECT_ROOT / "state.json"
 
 
 class QuizGame:
@@ -17,12 +23,14 @@ class QuizGame:
     def __init__(
         self,
         quizzes: list[Quiz] | None = None,
+        state_path: Path | None = None,
         input_func: Callable[[str], str] = input,
         output_func: Callable[[str], None] = print,
     ) -> None:
         # 전달받은 목록을 복사해 게임 밖의 목록 변경과 상태를 분리한다.
         self.quizzes = list(quizzes) if quizzes is not None else []
         self.best_scores: dict[str, int] = {}
+        self.state_path = state_path or DEFAULT_STATE_PATH
 
         # 같은 게임 로직을 실제 터미널과 자동 테스트에서 함께 사용한다.
         self.input = input_func
@@ -63,6 +71,58 @@ class QuizGame:
 
             self.output("입력값이 비어 있습니다. 내용을 입력해 주세요.")
 
+    def save_state(self) -> bool:
+        """현재 퀴즈와 최고 점수를 UTF-8 JSON 파일에 저장한다."""
+        state = {
+            "quizzes": [quiz.to_dict() for quiz in self.quizzes],
+            "best_scores": self.best_scores,
+        }
+        temp_path = self.state_path.with_name(f"{self.state_path.name}.tmp")
+
+        try:
+            with temp_path.open("w", encoding="utf-8", newline="\n") as file:
+                json.dump(state, file, ensure_ascii=False, indent=2)
+                file.write("\n")
+            temp_path.replace(self.state_path)
+        except OSError as error:
+            self.output(f"상태 파일을 저장하지 못했습니다: {error}")
+            return False
+
+        return True
+
+    def load_state(self) -> bool:
+        """상태 파일이 있으면 퀴즈와 최고 점수를 복원한다."""
+        if not self.state_path.exists():
+            return self.save_state()
+
+        with self.state_path.open("r", encoding="utf-8") as file:
+            state = json.load(file)
+
+        if not isinstance(state, dict):
+            raise ValueError("상태 데이터는 객체 형식이어야 합니다.")
+
+        quizzes_data = state.get("quizzes")
+        best_scores_data = state.get("best_scores")
+        if not isinstance(quizzes_data, list):
+            raise ValueError("quizzes는 목록이어야 합니다.")
+        if not isinstance(best_scores_data, dict):
+            raise ValueError("best_scores는 객체여야 합니다.")
+
+        loaded_quizzes = [Quiz.from_dict(data) for data in quizzes_data]
+        loaded_scores: dict[str, int] = {}
+        for category, score in best_scores_data.items():
+            if not isinstance(category, str) or not category.strip():
+                raise ValueError("최고 점수의 카테고리 이름이 올바르지 않습니다.")
+            if isinstance(score, bool) or not isinstance(score, int):
+                raise ValueError("최고 점수는 정수여야 합니다.")
+            if not 0 <= score <= 100:
+                raise ValueError("최고 점수는 0부터 100 사이여야 합니다.")
+            loaded_scores[category.strip()] = score
+
+        self.quizzes = loaded_quizzes
+        self.best_scores = loaded_scores
+        return True
+
     def add_quiz(self) -> None:
         """새 4지선다형 퀴즈를 입력받아 현재 게임의 목록에 추가한다."""
         self.output("\n=== 퀴즈 추가 ===")
@@ -75,15 +135,18 @@ class QuizGame:
         ]
         answer = self.read_int("정답 번호(1~4): ", 1, 4)
 
-        self.quizzes.append(
-            Quiz(
-                category=category,
-                question=question,
-                choices=choices,
-                answer=answer,
-            )
+        new_quiz = Quiz(
+            category=category,
+            question=question,
+            choices=choices,
+            answer=answer,
         )
-        self.output("퀴즈를 추가했습니다.")
+        self.quizzes.append(new_quiz)
+
+        if self.save_state():
+            self.output("퀴즈를 추가하고 저장했습니다.")
+        else:
+            self.output("퀴즈는 추가했지만 파일에는 저장하지 못했습니다.")
 
     def list_quizzes(self) -> None:
         """퀴즈를 카테고리별로 묶어 한 줄 형식으로 출력한다."""
@@ -179,6 +242,7 @@ class QuizGame:
         previous_score = self.best_scores.get(category)
         if previous_score is None or score > previous_score:
             self.best_scores[category] = score
+            self.save_state()
             return True
         return False
 
@@ -197,6 +261,7 @@ class QuizGame:
 
     def safe_exit(self, interrupted: bool = False) -> None:
         """정상 종료와 입력 중단 종료의 안내를 한곳에서 처리한다."""
+        self.save_state()
         if interrupted:
             self.output("")
             self.output("입력이 중단되었습니다.")

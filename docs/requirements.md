@@ -73,6 +73,8 @@
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 직접 실행해 순서 변화 확인 | 실행 로그 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 구현 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `select_quiz_count()`·`play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
-| BONUS-03 | 힌트와 점수 차감 | 선택 | `Quiz.hint`·`ask_for_hint()`·`show_hint()`·`play_quizzes()` | 문제별 저장 힌트와 사용 전후 누적 점수 확인 | 실행 로그 | 선택 | `Feat: 문제별 힌트 저장 방식 개선` | 실행 검증 완료 |
+| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 10초 전·후 정답의 3점·1점 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 구현 완료, 직접 확인 필요 |
 | BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `record_game_result()`·`show_score_history()`·JSON 스키마 | 6회 이상 플레이 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
+| BONUS-06 | 문제별 20초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 20초, 현재 입력 줄 갱신과 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 커서 이동 오류 수정, 직접 재확인 필요 |
+| BONUS-07 | 시간 초과 입력이 다음 문제와 충돌하지 않음 | 선택 | `TimedTerminalInput._flush_pending_input()` | Enter 없는 입력 후 시간 초과, 다음 문제 답 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 부분 검증 |

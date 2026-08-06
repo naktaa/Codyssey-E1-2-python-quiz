@@ -57,5 +57,22 @@
     }
   ],
   "best_score": 4,
-  "score_history": []
+  "score_history": [
+    {
+      "played_at": "2026-08-06 17:14",
+      "score": 4,
+      "max_score": 15,
+      "correct_count": 2,
+      "total_count": 5,
+      "hint_count": 3
+    },
+    {
+      "played_at": "2026-08-06 17:17",
+      "score": 0,
+      "max_score": 12,
+      "correct_count": 0,
+      "total_count": 4,
+      "hint_count": 4
+    }
+  ]
 }

@@ -1501,3 +1501,117 @@ git diff --check
   설명하고, 사용자 승인 후 구현한다.
 
 ---
+
+## 2026-08-06 — 제한 시간과 자동 힌트 실험 구현
+
+- 환경: macOS / zsh / Python 3.12.13
+- 브랜치: `Test/time-limit`
+- 목표: 문제마다 20초 제한 시간, 10초 자동 힌트와 한 줄 카운트다운을 실험한다.
+- 요구사항: `BONUS-03`, `BONUS-06`, `BONUS-07`
+
+### 작업 시작 상태
+
+- 사용자가 실험용 `Test/time-limit` 브랜치를 미리 만들고 체크아웃했다.
+- 작업 트리는 깨끗했다.
+- 브랜치 시작 커밋은
+  `ba58b00 Docs: 최신 작업 상태와 검증 결과 갱신`이었다.
+
+### 변경 파일
+
+- `src/timed_input.py`: `select`, `time.monotonic`, 현재 줄 갱신과 `termios`를
+  사용하는 20초 제한 시간 입력 구현
+- `src/game_manager.py`: 수동 힌트 선택 제거, 자동 힌트 결과에 따른 3점·1점·0점
+  계산과 시간 초과 흐름 연결
+- `README.md`, `docs/architecture-plan.md`, `docs/requirements.md`,
+  `docs/progress.md`: 실험 구조·상태·직접 확인 항목 반영
+- `docs/worklog.md`: 실제 구현과 격리 검사 결과 기록
+
+### 구현 동작
+
+- 각 문제를 출력한 뒤 20초부터 새 카운트다운을 시작한다.
+- 대화형 터미널에서는 현재 입력 줄의 `남은 시간 | 정답 번호`를 다시 그린다.
+- 10초가 되면 해당 문제의 JSON 힌트를 자동 공개한다.
+- 10초 전 정답은 3점, 이후 정답은 1점, 오답·시간 초과는 0점이다.
+- 빈 입력·문자·범위 밖 숫자는 타이머를 초기화하지 않고 다시 입력받는다.
+- 20초 시간 초과 시 입력 큐를 비워 이전 문제 입력이 다음 문제와 섞이지 않게 한다.
+- JSON 스키마는 바꾸지 않고 기존 `hint_count`를 자동 힌트 공개 횟수로 사용한다.
+
+### 실행 명령과 실제 결과
+
+```zsh
+python3 -m py_compile main.py src/*.py
+git diff --check
+```
+
+- Python 문법 검사와 공백 오류 검사가 통과했다.
+- `pty.openpty()` 기반 임시 검사에서 다음 결과를 확인했다.
+  - `PTY fast/hint/invalid/timeout-input-flush cases OK`
+  - `PTY one-line countdown and automatic hint display OK`
+  - `QuizGame 3/1/0 scoring and automatic-hint history OK`
+  - `integrated PTY menu/play/save/exit flow OK`
+  - `timed-input KeyboardInterrupt safe-exit OK`
+- 빠른 정답, 힌트 후 정답, 잘못된 입력 후 재입력과 무입력 시간 초과를 확인했다.
+- 3초 단축 검사에서 `3초 → 2초 → 1초`가 같은 줄에 갱신되고 힌트가 자동
+  공개되는 것을 확인했다.
+- 첫 문제에서 `2`만 입력하고 Enter 없이 시간 초과한 뒤 두 번째 문제에 `3`을
+  입력했을 때 `23`이 아니라 `3`만 처리됐다.
+- 제한 시간 입력 대기 중 `KeyboardInterrupt`가 발생해도 traceback 없이 상태를
+  저장하고 종료 안내를 출력했다.
+- 실제 20초 설정의 `main.py` 사용자 실행은 아직 미검증이다.
+
+### Git 상태
+
+- 구현·문서: 미커밋
+- push: 미실시
+- 권장 커밋 메시지: `Feat: 제한 시간과 자동 힌트 기능 실험`
+
+### 다음 작업
+
+- 사용자가 확인용 JSON으로 실제 20초 카운트다운, 10초 자동 힌트, 점수와
+  문제별 시간 초기화를 macOS 터미널에서 직접 확인한다.
+
+---
+
+## 2026-08-06 — 카운트다운의 문제 영역 덮어쓰기 수정
+
+- 환경: macOS 터미널 / zsh
+- 브랜치: `Test/time-limit`
+- 관련 요구사항: `BONUS-06`, `BONUS-07`
+
+### 실제 증상과 원인
+
+- 사용자가 실제 터미널에서 실행했을 때 남은 시간이 매초 위쪽 줄로 이동하면서
+  선택지와 문제를 지우고, 타이머 출력이 여러 줄에 남았다.
+- 최초 구현은 ANSI 커서 저장·복원 뒤 위쪽 타이머 줄로 이동하는 방식이었다.
+- 터미널에서 저장·복원 시퀀스가 기대대로 처리되지 않으면 복원되지 않은 현재
+  위치를 기준으로 다음 갱신이 다시 위로 이동해 문제 영역까지 덮을 수 있었다.
+
+### 변경 내용
+
+- 커서 저장·복원과 위쪽 이동 시퀀스를 모두 제거했다.
+- 타이머와 답 입력을 `남은 시간 | 정답 번호` 한 줄에 함께 표시하고 `\r`과
+  현재 줄 지우기만 사용해 같은 줄을 다시 그린다.
+- `termios`로 입력 중에 canonical mode와 echo를 잠시 끄고, `os.read()`로 받은
+  문자를 내부 버퍼에 보관해 타이머 갱신 중에도 입력 내용이 사라지지 않게 했다.
+- 답 제출·시간 초과·EOF·`KeyboardInterrupt` 모든 종료 경로에서 원래 터미널
+  설정을 복원한다.
+- `select`와 텍스트 스트림 버퍼가 서로 다른 입력 상태를 볼 수 있으므로 대화형
+  입력은 `sys.stdin.read()` 대신 `os.read()`를 사용한다.
+
+### 재검증 결과
+
+```zsh
+python3 -m py_compile main.py src/*.py
+python3 -m json.tool state.json >/dev/null
+git diff --check
+```
+
+- 문법, JSON, 공백 검사가 통과했다.
+- PTY 격리 검사 결과:
+  - `PTY fast/hint/invalid/timeout-isolation/interrupt cases OK`
+  - `No cursor-up or cursor-save escape sequences emitted`
+- 빠른 정답, 자동 힌트 후 정답, 잘못된 입력 후 재입력, 첫 문제의 Enter 없는
+  입력이 다음 문제와 분리되는 동작과 `KeyboardInterrupt`를 확인했다.
+- 실제 macOS 터미널에서 수정된 화면 갱신 동작은 사용자 재확인이 필요하다.
+
+---

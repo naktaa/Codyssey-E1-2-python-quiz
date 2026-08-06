@@ -287,10 +287,24 @@ class QuizGame:
             self.output(f"상태 파일이 손상되었습니다: {error}")
             return self.recover_corrupted_state()
 
+        self.restore_missing_default_hints(loaded_quizzes)
         self.quizzes = loaded_quizzes
         self.best_scores = loaded_scores
         self.score_history = loaded_history
         return True
+
+    def restore_missing_default_hints(self, quizzes: list[Quiz]) -> None:
+        """기존 JSON의 기본 문제에 누락된 힌트를 기본 데이터에서 보완한다."""
+        default_hints = {
+            (quiz.category.casefold(), quiz.question.casefold()): quiz.hint
+            for quiz in self._default_quizzes
+            if quiz.hint is not None
+        }
+        for quiz in quizzes:
+            if quiz.hint is None:
+                quiz.hint = default_hints.get(
+                    (quiz.category.casefold(), quiz.question.casefold())
+                )
 
     def add_quiz(self) -> None:
         """새 4지선다형 퀴즈를 입력받아 현재 게임의 목록에 추가한다."""
@@ -303,12 +317,14 @@ class QuizGame:
             for number in range(1, 5)
         ]
         answer = self.read_int("정답 번호(1~4): ", 1, 4)
+        hint = self.read_nonempty("힌트: ")
 
         new_quiz = Quiz(
             category=category,
             question=question,
             choices=choices,
             answer=answer,
+            hint=hint,
         )
         self.quizzes.append(new_quiz)
 
@@ -430,19 +446,14 @@ class QuizGame:
             total_count,
         )
 
-    def show_hint(self, quiz: Quiz) -> None:
-        """정답과 오답 하나를 남긴 두 개의 정답 후보를 출력한다."""
-        wrong_numbers = [
-            number
-            for number in range(1, len(quiz.choices) + 1)
-            if number != quiz.answer
-        ]
-        hint_numbers = sorted([quiz.answer, random.choice(wrong_numbers)])
-        hint_choices = " 또는 ".join(
-            f"{number}) {quiz.choices[number - 1]}"
-            for number in hint_numbers
-        )
-        self.output(f"힌트: 정답 후보는 {hint_choices} 중 하나입니다.")
+    def show_hint(self, quiz: Quiz) -> bool:
+        """저장된 문제별 힌트를 출력하고 제공 여부를 반환한다."""
+        if quiz.hint is None:
+            self.output("기존 데이터에는 힌트가 등록되지 않았습니다.")
+            return False
+
+        self.output(f"힌트: {quiz.hint}")
+        return True
 
     def ask_for_hint(self, quiz: Quiz) -> bool:
         """힌트 사용 여부를 입력받고 사용 여부를 반환한다."""
@@ -451,8 +462,7 @@ class QuizGame:
         self.output("2. 바로 풀기")
         choice = self.read_int("선택하세요: ", 1, 2)
         if choice == 1:
-            self.show_hint(quiz)
-            return True
+            return self.show_hint(quiz)
         return False
 
     def play_quizzes(self) -> int | None:

@@ -1204,3 +1204,54 @@ git diff --check
    출력하도록 변경한다.
 2. 퀴즈 추가 직후 저장에 실패했을 때 새 퀴즈를 메모리에 유지할지 제거할지
    결정하고 `add_quiz()`의 실패 처리를 정리한다.
+## 2026-08-06 — 문제별 JSON 저장 힌트 구현
+
+- 환경: macOS / zsh
+- 브랜치: `main`
+- 목표: 두 선택지 후보 방식의 힌트를 각 문제에 저장된 문장형 힌트로 변경
+- 요구사항: `BONUS-03`, `DATA-02`, `DATA-03`
+
+### 작업 시작 상태
+
+- `main`과 로컬 추적 기준 `origin/main`은 `c362ed7`에서 일치했다.
+- 작업 트리는 깨끗했다.
+- 사용자 승인 후 저장형 힌트 범위만 구현했다.
+
+### 변경 파일
+
+- `src/quiz.py`: 선택적 `hint` 속성과 검증·JSON 변환·복원 추가
+- `src/default_quizzes.py`: 기본 문제 5개에 직접 작성한 힌트 추가
+- `src/game_manager.py`: 기존 기본 문제의 힌트 보완, 새 퀴즈 힌트 입력,
+  저장된 힌트 출력과 힌트 미등록 시 점수 비차감 처리
+- `state.json`: 기본 퀴즈 5개의 `hint` 필드 추가
+- `README.md`, `docs/requirements.md`, `docs/progress.md`: 구현 상태와 스키마 반영
+
+### 기존 JSON 호환
+
+- `hint` 필드가 없는 기존 JSON도 손상 데이터로 판정하지 않는다.
+- 카테고리와 질문이 기본 문제와 일치하면 기본 데이터의 힌트를 연결한다.
+- 일치하지 않는 기존 사용자 추가 문제는 힌트 미등록 안내 후 힌트 사용으로
+  계산하지 않아 점수를 차감하지 않는다.
+
+### 실행 명령과 실제 결과
+
+```zsh
+python3 -c 'import json; from src.default_quizzes import get_default_quizzes; from src.game_manager import QuizGame; from src.quiz import Quiz; defaults=get_default_quizzes(); legacy=[q.to_dict() for q in defaults]; [item.pop("hint") for item in legacy]; loaded=[Quiz.from_dict(item) for item in legacy]; game=QuizGame(quizzes=defaults, output_func=lambda message: None); game.restore_missing_default_hints(loaded); assert all(q.hint for q in loaded); unknown=Quiz("기타", "기존 문제", ["1", "2", "3", "4"], 1); assert game.show_hint(unknown) is False; assert all("hint" in q.to_dict() for q in defaults); json.load(open("state.json", encoding="utf-8")); [compile(open(path, encoding="utf-8").read(), path, "exec") for path in ("main.py", "src/__init__.py", "src/quiz.py", "src/default_quizzes.py", "src/game_manager.py")]; print("힌트 직렬화·기존 JSON 호환·Python/JSON 문법 확인 완료")'
+git diff --check
+```
+
+- 힌트 직렬화, 기존 기본 문제의 힌트 보완과 힌트 미등록 시 반환값을 확인했다.
+- Python 파일 5개 문법과 `state.json` JSON 형식을 확인했다.
+- 사용자 `main.py` 직접 실행은 아직 하지 않았으며 확인 필요 상태다.
+
+### Git 상태
+
+- commit·push: 사용자 직접 확인 후 수행 예정
+- 권장 커밋 메시지: 구현 완료 안내에서 제공
+
+### 다음 작업
+
+- 사용자가 확인용 상태 파일로 기본 힌트 출력, 1점 계산과 새 퀴즈 힌트의
+  재실행 유지를 직접 확인한다.
+
+---

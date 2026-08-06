@@ -24,7 +24,7 @@
 | GIT-03 | 의미 있는 커밋 10개 이상 | 필수 | Git 이력 | `git rev-list --count HEAD` | Git 그래프 | 14 | 기능 단위 커밋 | 실행 검증 완료 |
 | GIT-04 | main 외 브랜치 생성·작업·병합 1회 이상 | 필수 | `feature/solving` | `git log --graph --all` | Git 그래프 | 5~6 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
 | GIT-05 | `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone` 각 1회 이상 사용 | 필수 | Git 작업 기록 | 터미널 기록·worklog 확인 | clone·pull 스크린샷 | 1, 5, 15 | 각 단계 커밋 | 구현 중 |
-| FUNC-01 | 실행 시 메뉴와 종료 기능 제공 | 필수 | `src/game_manager.py` | 메뉴 1~6 선택 확인 | 메뉴 스크린샷 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 구현 완료 |
+| FUNC-01 | 실행 시 메뉴와 종료 기능 제공 | 필수 | `src/game_manager.py` | 메뉴 1~6 선택 확인 | 메뉴 스크린샷 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 증거 확보 완료 |
 | FUNC-02 | 메뉴 입력 공백·빈 값·문자·범위 오류 처리 | 필수 | 입력 메서드 | ` 1 `, Enter, `abc`, `9` 입력 | 메뉴 스크린샷·로그 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 실행 검증 완료 |
 | FUNC-03 | 숫자 입력이 필요한 모든 위치에 공통 검증 적용 | 필수 | 공통 입력 메서드 | 메뉴·정답·추가 정답 오류 직접 입력 | 최종 검증 로그 | 12 | `Fix: 공통 입력 예외 처리 보완` | 구현 완료 |
 | FUNC-04 | Ctrl+C와 EOF에서 traceback 없이 안전 종료 | 필수 | 실행 루프·저장 메서드 | 입력 중 Ctrl+C, EOF 재현 | 최종 검증 로그 | 12 | `Fix: 입력 중단 시 안전 종료 처리` | 실행 검증 완료 |
@@ -58,7 +58,7 @@
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 부분 검증 |
-| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
+| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 화면 확보 | 필수 | `evidence/screenshots/` | 핵심 화면 확보와 평가 체크리스트 직접 실행 | 기능별 PNG·체크리스트 | 13, 16 | `Docs: README와 제출 증거 정리` | 부분 검증 |
 | EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |
@@ -71,10 +71,10 @@
 
 | ID | 요구사항 | 필수 여부 | 구현 위치 | 검증 방법 | 필요한 증거 | 구현 단계 | 권장 커밋 | 현재 상태 |
 |---|---|---|---|---|---|---:|---|---|
-| BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 직접 실행해 순서 변화 확인 | 실행 로그 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 구현 완료 |
+| BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 독립 실행해 순서 변화 확인 | 작업 로그·플레이 화면 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 증거 확보 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `select_quiz_count()`·`play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
-| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 10초 전·후 3점·1점 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |
+| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 10초 전·후 3점·1점 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 부분 증거 확보, 평가 확인 예정 |
 | BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `record_game_result()`·`show_score_history()`·JSON 스키마 | 6회 이상 플레이 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
-| BONUS-06 | 문제별 20초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 20초, 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |
+| BONUS-06 | 문제별 20초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 20초, 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 증거 확보 완료 |
 | BONUS-07 | 시간 초과 입력이 다음 문제와 충돌하지 않음 | 선택 | `TimedTerminalInput._flush_pending_input()` | Enter 없는 입력 후 시간 초과, 다음 문제 답 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |

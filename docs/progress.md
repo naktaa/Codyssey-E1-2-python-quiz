@@ -2,13 +2,16 @@
 
 ## 현재 단계
 
-- 단계: 제한 시간 기능 검증 완료, `main` 병합 준비
-- 현재 작업 브랜치: `Test/time-limit`
+- 단계: 제한 시간 기능 `main` 병합 완료, 최종 검증·증거 정리
+- 현재 작업 브랜치: `main`
 - 실험 시작 커밋: `ba58b00 Docs: 최신 작업 상태와 검증 결과 갱신`
 - 기능 커밋: `e53b9cf Feat: 제한 시간과 자동 힌트 기능 실험`
 - 화면 수정 커밋: `ddc2d8e Fix: 힌트와 오류 메시지 출력 위치 안정화`
-- `Test/time-limit`과 `origin/Test/time-limit`은 `ddc2d8e`에서 일치한다.
-- 사용자 직접 확인과 회귀 검사는 완료했으며 `main`에는 아직 병합하지 않았다.
+- 제한 시간 브랜치 최종 문서 커밋은
+  `34502ed Docs: 제한 시간 기능 검증 정리`다.
+- 사용자 직접 확인과 회귀 검사 후
+  `cf18374 Merge: 제한 시간 기능 브랜치 병합`으로 `main` 병합을 완료했다.
+- `main`과 `origin/main`은 `cf18374`에서 일치한다.
 - JSON 병합: `4984e31 Merge: JSON 상태 관리 브랜치 병합`
 - 보너스 병합: `1b03b4b Merge branch 'feature/bonus'`
 - Git 직접 조작은 사용자가 수행
@@ -159,11 +162,15 @@
 - 최신 문서 정리는 `ba58b00 Docs: 최신 작업 상태와 검증 결과 갱신`로 push 완료
 - 제한 시간과 자동 힌트는 `e53b9cf`, 화면 위치 안정화는 `ddc2d8e`로
   `origin/Test/time-limit`에 push 완료
+- 제한 시간 검증 문서는 `34502ed`로 정리하고 `cf18374`에서 `main` 병합 완료
 - clone·pull 증거는 마지막 단계에서 정리
 
 ## 확보한 증거
 
 - 초기 Git 설정: `evidence/git/git-verification.md`, `evidence/git/git-log.png`
+- 현재 메뉴: `evidence/screenshots/main-menu.png` — 병합 후 메뉴 1~6
+- 현재 플레이: `evidence/screenshots/game-play.png` — 5문제 선택, 무작위 순서,
+  자동 힌트·카운트다운과 힌트 후 1점 화면
 - 초기 메뉴 화면: `evidence/screenshots/menu-test.png` — 개발 과정 자료
 - 과거 브랜치 병합: `evidence/screenshots/git-merge.png` — 개발 과정 자료
 - 메모리 동작 비교: `evidence/logs/memory-persistence-test.md`
@@ -172,11 +179,11 @@
 - 최고 점수: `evidence/logs/best-score.md`
 - 최고 점수 재실행 유지: `evidence/logs/persistence-restart.md`
 - JSON 복구: `evidence/logs/json-recovery.md`, `evidence/screenshots/json-recovery.png`
-- 문제별 힌트와 카테고리 없는 단일 퀴즈 흐름은 사용자가 정상 동작을 직접
-  확인했지만, 이 대화에서 별도 원본 로그나 캡처는 추가되지 않았다.
-- 20초 카운트다운, 10초 힌트 제자리 공개, 입력 유지와 하단 오류 줄 갱신은
-  사용자가 macOS 터미널에서 정상 동작을 직접 확인했다. 별도 원본 로그나
-  캡처는 아직 추가되지 않았다.
+- 20초 카운트다운과 10초 자동 힌트는 사용자가 macOS 터미널에서 정상 동작을
+  직접 확인했고 현재 플레이 화면도 확보했다. 3점·시간 초과 0점 등 나머지 분기는
+  평가 시 체크리스트로 확인한다.
+- 기본 문제 5개를 선택한 독립 실행 8회에서 7가지 출제 순서를 확인했다.
+  `random.seed()`는 사용하지 않으며 `random.sample()`이 매 게임 새 순서를 만든다.
 
 ## 최종 정리 시 확인할 항목
 
@@ -185,7 +192,9 @@
 - JSON 저장 중 실제 읽기·쓰기 OS 오류 직접 재현
 - 빈 퀴즈 상태의 플레이·목록·점수 화면 최종 직접 확인
 - 추가, 플레이 결과, 정상 영속성 재실행 화면·원본 로그
-- 모든 기능 완료 후 메뉴와 Git 그래프 최종 증거
+- 평가용 체크리스트에 따라 추가·목록·삭제·점수와 입력 오류 직접 확인
+- 미션에 명시된 추가·목록·플레이 결과·점수·재실행 핵심 증거 확보
+- 모든 기능 완료 후 Git 그래프 최종 증거
 - 별도 디렉터리 clone·push와 기존 폴더 pull 반영 증거
 - README 절차 기준 macOS zsh 최종 재현 로그
 - 추적 중인 `state.json`은 기본 퀴즈 5개를 유지하고 `best_score: null`,
@@ -193,9 +202,7 @@
 
 ## 다음 작업
 
-- 이번 점검 문서를 `Test/time-limit`에서 커밋하고 push한다.
-- `main`을 최신 상태로 갱신한 뒤 `git merge --no-ff Test/time-limit`로 병합
-  커밋을 남기고 push한다.
-- 병합 후 현재 메뉴·추가·목록·제한 시간 플레이·점수·영속성 화면과 최종 Git
-  그래프를 새로 확보한다.
-- 별도 디렉터리 clone·push와 기존 작업 폴더 pull 반영을 마지막에 수행한다.
+- 평가용 기능 체크리스트를 작성하고 macOS에서 직접 실행해 확인한다.
+- 추가 퀴즈와 점수의 종료·재실행 영속성을 최종 확인한다.
+- 최종 문서와 증거 커밋이 끝나면 Git 그래프를 확보한다.
+- 그 뒤 별도 디렉터리 clone·push와 기존 작업 폴더 pull 반영을 마지막으로 수행한다.

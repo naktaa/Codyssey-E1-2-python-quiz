@@ -26,6 +26,8 @@ class TimedTerminalInput:
     HINT_DELAY_SECONDS = 10.0
 
     CLEAR_LINE = "\033[2K"
+    CURSOR_UP_ONE_LINE = "\033[1A"
+    CURSOR_DOWN_ONE_LINE = "\033[1B"
 
     def __init__(
         self,
@@ -58,6 +60,7 @@ class TimedTerminalInput:
         hint_shown = False
         remaining_seconds = math.ceil(self.time_limit_seconds)
         answer_buffer = ""
+        error_line_visible = False
         input_line_finished = False
         original_settings = termios.tcgetattr(sys.stdin.fileno())
         input_settings = original_settings.copy()
@@ -82,7 +85,7 @@ class TimedTerminalInput:
 
                 if not hint_shown and now >= hint_at:
                     hint_shown = True
-                    self._print_hint(hint)
+                    self._replace_hint_line(hint)
                     self._draw_input_line(remaining_seconds, answer_buffer)
 
                 new_remaining = math.ceil(deadline - now)
@@ -109,7 +112,8 @@ class TimedTerminalInput:
 
                 if not hint_shown and observed_at >= hint_at:
                     hint_shown = True
-                    self._print_hint(hint)
+                    self._replace_hint_line(hint)
+                    self._draw_input_line(remaining_seconds, answer_buffer)
 
                 new_remaining = math.ceil(deadline - observed_at)
                 if new_remaining != remaining_seconds:
@@ -151,13 +155,18 @@ class TimedTerminalInput:
                         )
                     if not hint_shown and submitted_at >= hint_at:
                         hint_shown = True
-                        self._print_hint(hint)
+                        self._replace_hint_line(hint)
+                        self._draw_input_line(
+                            remaining_seconds,
+                            answer_buffer,
+                        )
 
                     answer_text = answer_buffer.strip()
                     if answer_text in {"1", "2", "3", "4"}:
                         self._finish_input_line(
                             remaining_seconds,
                             answer_text,
+                            error_line_visible,
                         )
                         input_line_finished = True
                         return TimedAnswerResult(
@@ -165,12 +174,15 @@ class TimedTerminalInput:
                             hint_shown=hint_shown,
                         )
 
-                    self._clear_current_line()
-                    print("1부터 4 사이의 숫자를 입력해 주세요.")
                     answer_buffer = ""
                     remaining_seconds = math.ceil(
                         deadline - submitted_at
                     )
+                    self._show_error_below_input(
+                        "1부터 4 사이의 숫자를 입력해 주세요.",
+                        error_line_visible,
+                    )
+                    error_line_visible = True
                     self._draw_input_line(
                         remaining_seconds,
                         answer_buffer,
@@ -185,7 +197,7 @@ class TimedTerminalInput:
             )
             self._flush_pending_input()
             if not input_line_finished:
-                self._close_prompt(clear_line=True)
+                self._close_interactive_panel(error_line_visible)
 
     def _read_stream_answer(self, hint: str | None) -> TimedAnswerResult:
         """TTY가 아닌 입출력에서도 기존 줄 단위 입력을 지원한다."""
@@ -288,17 +300,54 @@ class TimedTerminalInput:
         )
         sys.stdout.flush()
 
-    def _print_hint(self, hint: str | None) -> None:
-        self._clear_current_line()
-        print(self._hint_text(hint, hint_shown=True))
+    def _replace_hint_line(self, hint: str | None) -> None:
+        """현재 입력 줄을 유지하며 바로 위의 힌트 줄만 교체한다."""
+        sys.stdout.write(
+            f"\r{self.CLEAR_LINE}{self.CURSOR_UP_ONE_LINE}\r"
+            f"{self.CLEAR_LINE}{self._hint_text(hint, hint_shown=True)}"
+            f"{self.CURSOR_DOWN_ONE_LINE}\r"
+        )
+        sys.stdout.flush()
 
     def _finish_input_line(
         self,
         remaining_seconds: int,
         answer_text: str,
+        error_line_visible: bool,
     ) -> None:
         self._draw_input_line(remaining_seconds, answer_text)
-        print("")
+        if error_line_visible:
+            sys.stdout.write(f"\r\n{self.CLEAR_LINE}\r\n")
+        else:
+            sys.stdout.write("\r\n")
+        sys.stdout.flush()
+
+    def _show_error_below_input(
+        self,
+        message: str,
+        error_line_visible: bool,
+    ) -> None:
+        """입력 줄 아래의 오류 전용 줄을 만들거나 같은 자리에서 갱신한다."""
+        if error_line_visible:
+            sys.stdout.write(self.CURSOR_DOWN_ONE_LINE)
+        else:
+            sys.stdout.write("\r\n")
+
+        sys.stdout.write(
+            f"\r{self.CLEAR_LINE}{message}"
+            f"{self.CURSOR_UP_ONE_LINE}\r"
+        )
+        sys.stdout.flush()
+
+    def _close_interactive_panel(self, error_line_visible: bool) -> None:
+        """입력과 선택적 오류 줄을 정리하고 패널 다음 줄로 이동한다."""
+        self._clear_current_line()
+        if error_line_visible:
+            sys.stdout.write(
+                f"{self.CURSOR_DOWN_ONE_LINE}\r{self.CLEAR_LINE}"
+            )
+        sys.stdout.write("\r\n")
+        sys.stdout.flush()
 
     def _clear_current_line(self) -> None:
         sys.stdout.write(f"\r{self.CLEAR_LINE}")
@@ -306,8 +355,7 @@ class TimedTerminalInput:
 
     def _hint_text(self, hint: str | None, hint_shown: bool) -> str:
         if not hint_shown:
-            hint_delay = f"{self.hint_delay_seconds:g}"
-            return f"힌트: {hint_delay}초 후 자동으로 공개됩니다."
+            return "힌트:"
         if hint is None:
             return "힌트: 등록된 힌트가 없습니다."
         return f"힌트: {hint}"

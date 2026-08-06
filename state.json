@@ -56,23 +56,6 @@
       "hint": "거대한 붉은 점으로 유명한 가스 행성입니다."
     }
   ],
-  "best_score": 4,
-  "score_history": [
-    {
-      "played_at": "2026-08-06 17:14",
-      "score": 4,
-      "max_score": 15,
-      "correct_count": 2,
-      "total_count": 5,
-      "hint_count": 3
-    },
-    {
-      "played_at": "2026-08-06 17:17",
-      "score": 0,
-      "max_score": 12,
-      "correct_count": 0,
-      "total_count": 4,
-      "hint_count": 4
-    }
-  ]
+  "best_score": null,
+  "score_history": []
 }

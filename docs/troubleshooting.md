@@ -54,11 +54,11 @@ git diff --check
 
 - 재검증 결과: 반복 오류, 힌트 공개, 입력값 유지와 정답 제출이 통과했다. 오류가
   있는 상태의 시간 초과 후 다음 문제 입력 분리와 `KeyboardInterrupt`도 통과했다.
-  실제 macOS 터미널 화면은 사용자 재확인 필요.
+  사용자가 실제 macOS 터미널에서 원하는 화면 배치로 동작함을 확인했다.
 - 관련 변경 파일: `src/timed_input.py`, `README.md`, `docs/architecture-plan.md`,
   `docs/progress.md`, `docs/requirements.md`, `docs/worklog.md`,
   `docs/troubleshooting.md`
-- 관련 커밋: 미커밋
+- 관련 커밋: `ddc2d8e Fix: 힌트와 오류 메시지 출력 위치 안정화`
 - 재발 방지: 동적 안내 문구는 새 줄을 반복 출력하지 않고 전용 줄의 생성 여부와
   종료 시 정리까지 함께 관리한다.
 
@@ -89,11 +89,11 @@ git diff --check
 - 재검증 결과: 정적 검사 성공. PTY 검사에서 빠른 정답, 자동 힌트, 잘못된 입력,
   시간 초과 입력 분리와 `KeyboardInterrupt`가 통과했다. 매초 커서 위 이동과
   커서 저장·복원은 출력되지 않으며, 힌트 공개 때 한 번의 위·아래 이동만 쌍으로
-  실행됨을 확인했다. 실제 터미널 화면은 사용자 재확인 필요.
+  실행됨을 확인했다. 사용자가 실제 macOS 터미널에서도 정상 동작을 확인했다.
 - 관련 변경 파일: `src/timed_input.py`, `README.md`, `docs/architecture-plan.md`,
   `docs/progress.md`, `docs/requirements.md`, `docs/worklog.md`,
   `docs/troubleshooting.md`
-- 관련 커밋: 미커밋
+- 관련 커밋: `ddc2d8e Fix: 힌트와 오류 메시지 출력 위치 안정화`
 - 재발 방지: 매초 갱신은 현재 입력 줄 안에서만 수행하고, 위쪽 이동이 필요하면
   미리 확보한 인접 줄만 대상으로 같은 횟수의 아래쪽 이동을 명시한다.
 

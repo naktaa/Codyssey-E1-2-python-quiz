@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 
 from .quiz import Quiz
+from .timed_input import TimedTerminalInput
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +52,7 @@ class QuizGame:
         self.score_history: list[dict[str, str | int]] = []
         self.state_path = state_path or get_state_path()
         self._state_save_enabled = True
+        self.timed_input = TimedTerminalInput()
 
     def show_menu(self) -> None:
         print("")
@@ -387,27 +389,8 @@ class QuizGame:
             total_count,
         )
 
-    def show_hint(self, quiz: Quiz) -> bool:
-        """저장된 문제별 힌트를 출력하고 제공 여부를 반환한다."""
-        if quiz.hint is None:
-            print("기존 데이터에는 힌트가 등록되지 않았습니다.")
-            return False
-
-        print(f"힌트: {quiz.hint}")
-        return True
-
-    def ask_for_hint(self, quiz: Quiz) -> bool:
-        """힌트 사용 여부를 입력받고 사용 여부를 반환한다."""
-        print("힌트를 사용하시겠습니까?")
-        print("1. 힌트 보기")
-        print("2. 바로 풀기")
-        choice = self.read_int("선택하세요: ", 1, 2)
-        if choice == 1:
-            return self.show_hint(quiz)
-        return False
-
     def play_quizzes(self) -> int | None:
-        """전체 상식 퀴즈에서 지정한 수의 문제를 무작위로 출제한다."""
+        """전체 상식 퀴즈를 자동 힌트가 있는 제한 시간 방식으로 출제한다."""
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
             return None
@@ -423,16 +406,19 @@ class QuizGame:
         for number, quiz in enumerate(selected_quizzes, start=1):
             print("")
             quiz.display(number=number)
-            hint_used = self.ask_for_hint(quiz)
-            if hint_used:
+            answer_result = self.timed_input.read_answer(quiz.hint)
+            if answer_result.hint_shown:
                 hint_count += 1
-            user_answer = self.read_int("정답 번호를 입력하세요: ", 1, 4)
 
-            if quiz.is_correct(user_answer):
+            if answer_result.answer is None:
+                print("시간 초과입니다. 0점입니다.")
+                continue
+
+            if quiz.is_correct(answer_result.answer):
                 correct_count += 1
                 earned_points = (
                     self.HINT_CORRECT_POINTS
-                    if hint_used
+                    if answer_result.hint_shown
                     else self.CORRECT_POINTS
                 )
                 score += earned_points
@@ -447,7 +433,7 @@ class QuizGame:
         max_score = total_count * self.CORRECT_POINTS
         print("\n=== 퀴즈 결과 ===")
         print(f"정답 수: {correct_count}/{total_count}")
-        print(f"힌트 사용: {hint_count}회")
+        print(f"자동 힌트 공개: {hint_count}회")
         print(f"점수: {score}점")
         if self.record_game_result(
             score=score,
@@ -522,7 +508,7 @@ class QuizGame:
             print(
                 f"{number}. {record['played_at']}  {record['score']}점  "
                 f"정답 {record['correct_count']}/{record['total_count']}  "
-                f"힌트 {record['hint_count']}회"
+                f"자동 힌트 {record['hint_count']}회"
             )
 
     def show_score_records(self) -> None:

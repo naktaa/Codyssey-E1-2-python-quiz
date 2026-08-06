@@ -17,7 +17,7 @@
 | ID | 요구사항 | 필수 여부 | 구현 위치 | 검증 방법 | 필요한 증거 | 구현 단계 | 권장 커밋 | 현재 상태 |
 |---|---|---|---|---|---|---:|---|---|
 | ENV-01 | Python 3.10 이상 사용 | 필수 | 개발 환경 | `python3 --version` | 환경 스크린샷 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
-| ENV-02 | 외부 라이브러리 없이 표준 라이브러리만 사용 | 필수 | 전체 코드 | import 목록과 직접 실행 확인 | 최종 검증 로그 | 13 | `Docs: 직접 실행 검증 결과 기록` | 구현 완료 |
+| ENV-02 | 외부 라이브러리 없이 표준 라이브러리만 사용 | 필수 | 전체 코드 | import 목록과 직접 실행 확인 | 최종 검증 로그 | 13 | `Docs: 직접 실행 검증 결과 기록` | 실행 검증 완료 |
 | ENV-03 | macOS zsh에서 최종 재현 | 필수 | 전체 프로젝트 | README 절차로 새 터미널 실행 | 최종 검증 로그 | 16 | `Docs: macOS 최종 재현 기록` | 예정 |
 | GIT-01 | GitHub 새 저장소와 로컬 저장소 설정 | 필수 | Git 저장소 | `git remote -v`, GitHub 확인 | 환경 또는 저장소 화면 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | GIT-02 | `.gitignore`, `README.md` 생성 후 첫 commit·push | 필수 | 루트 문서 | `git log -1`, 원격 저장소 | Git 로그 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
@@ -57,12 +57,12 @@
 | DOC-03 | README에 실제·확인용 실행 방법 포함 | 필수 | `README.md` | 그대로 따라 직접 실행 | 최종 검증 로그 | 14, 16 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
-| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 구현 중 |
+| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 부분 검증 |
 | EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 화면 확보 | 필수 | `evidence/screenshots/` | 각 기능 실제 실행 | 기능별 PNG | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |
-| SEC-01 | 저장소·로그·스크린샷에 비밀값 없음 | 필수 | 전체 제출물 | 토큰·키·인증정보 점검 | 최종 체크 결과 | 16 | `Docs: 제출 전 비밀값 점검 기록` | 예정 |
+| SEC-01 | 저장소·로그·스크린샷에 비밀값 없음 | 필수 | 전체 제출물 | 토큰·키·인증정보 점검 | 최종 체크 결과 | 16 | `Docs: 제출 전 비밀값 점검 기록` | 부분 검증 |
 
 ## 보너스 요구사항
 
@@ -73,6 +73,8 @@
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 직접 실행해 순서 변화 확인 | 실행 로그 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 구현 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `select_quiz_count()`·`play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
-| BONUS-03 | 힌트와 점수 차감 | 선택 | `Quiz.hint`·`ask_for_hint()`·`show_hint()`·`play_quizzes()` | 문제별 저장 힌트와 사용 전후 누적 점수 확인 | 실행 로그 | 선택 | `Feat: 문제별 힌트 저장 방식 개선` | 실행 검증 완료 |
+| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 10초 전·후 3점·1점 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |
 | BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `read_yes_no()`·`delete_quiz()`·`save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `record_game_result()`·`show_score_history()`·JSON 스키마 | 6회 이상 플레이 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
+| BONUS-06 | 문제별 20초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 20초, 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |
+| BONUS-07 | 시간 초과 입력이 다음 문제와 충돌하지 않음 | 선택 | `TimedTerminalInput._flush_pending_input()` | Enter 없는 입력 후 시간 초과, 다음 문제 답 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |

@@ -306,8 +306,8 @@ class QuizGame:
                     (quiz.category.casefold(), quiz.question.casefold())
                 )
 
-    def add_quiz(self) -> None:
-        """새 4지선다형 퀴즈를 입력받아 현재 게임의 목록에 추가한다."""
+    def add_quiz(self) -> bool:
+        """새 퀴즈를 추가하고 저장하며 실패하면 메모리 변경을 되돌린다."""
         self.output("\n=== 퀴즈 추가 ===")
         # 같은 이름은 기존 카테고리로, 새 이름은 새 카테고리로 사용한다.
         category = self.read_nonempty("카테고리 이름: ")
@@ -330,8 +330,11 @@ class QuizGame:
 
         if self.save_state():
             self.output("퀴즈를 추가하고 저장했습니다.")
-        else:
-            self.output("퀴즈는 추가했지만 파일에는 저장하지 못했습니다.")
+            return True
+
+        self.quizzes.pop()
+        self.output("파일에 저장하지 못해 퀴즈 추가를 취소했습니다.")
+        return False
 
     def list_quizzes(self) -> None:
         """퀴즈 질문을 카테고리별로 묶어 연속해서 출력한다."""

@@ -1255,3 +1255,53 @@ git diff --check
   재실행 유지를 직접 확인한다.
 
 ---
+
+## 2026-08-06 — 퀴즈 추가 저장 실패 시 메모리 복구
+
+- 환경: macOS / zsh
+- 브랜치: `main`
+- 목표: JSON 저장에 실패한 새 퀴즈가 현재 실행의 메모리에 남지 않도록 처리
+- 요구사항: `FUNC-11`, `DATA-06`
+
+### 작업 시작 상태
+
+- 문제별 저장 힌트를 사용자가 직접 확인했다.
+- 힌트 작업은 `c2321df Feat: 문제별 힌트 저장 방식 개선`로 push됐다.
+- `main`과 로컬 추적 기준 `origin/main`이 일치하고 작업 트리가 깨끗했다.
+
+### 변경 파일
+
+- `src/game_manager.py`: `add_quiz()`가 성공 여부를 반환하고 저장 실패 시 방금
+  추가한 퀴즈를 메모리 목록에서 제거하도록 변경
+- `README.md`, `docs/architecture-plan.md`, `docs/requirements.md`,
+  `docs/progress.md`: 저장 실패 처리와 현재 확인 상태 반영
+- `docs/worklog.md`: 구현 범위와 실제 검사 결과 기록
+
+### 동작 기준
+
+- 메모리 추가와 JSON 저장이 모두 성공해야 퀴즈 추가 성공으로 처리한다.
+- JSON 저장에 실패하면 기존 퀴즈 목록은 유지하고 새 퀴즈만 제거한다.
+- 실패 메시지는 `파일에 저장하지 못해 퀴즈 추가를 취소했습니다.`로 안내한다.
+
+### 실행 명령과 실제 결과
+
+```zsh
+python3 -c 'import json, tempfile; from pathlib import Path; from src.game_manager import QuizGame; from src.quiz import Quiz; values=["테스트", "저장 확인 문제", "가", "나", "다", "라", "2", "두 번째 선택지입니다."]; outputs=[]; tmp=tempfile.TemporaryDirectory(); path=Path(tmp.name)/"state.json"; game=QuizGame(state_path=path, input_func=lambda prompt: values.pop(0), output_func=outputs.append); assert game.add_quiz() is True; saved=json.loads(path.read_text(encoding="utf-8")); assert len(game.quizzes)==1 and saved["quizzes"][0]["hint"]=="두 번째 선택지입니다."; base=Quiz("기존", "기존 문제", ["1", "2", "3", "4"], 1, "기존 힌트"); fail_values=["테스트", "실패 문제", "가", "나", "다", "라", "2", "실패 힌트"]; fail_outputs=[]; failed_game=QuizGame(quizzes=[base], input_func=lambda prompt: fail_values.pop(0), output_func=fail_outputs.append); failed_game.save_state=lambda: False; assert failed_game.add_quiz() is False; assert failed_game.quizzes==[base]; assert fail_outputs[-1]=="파일에 저장하지 못해 퀴즈 추가를 취소했습니다."; tmp.cleanup(); print("정상 저장과 저장 실패 메모리 복구 확인 완료")'
+git diff --check
+```
+
+- 임시 디렉터리에서는 정상 추가 후 메모리와 JSON에 같은 힌트가 저장됐다.
+- 저장 실패를 주입한 게임에서는 반환값이 `False`였고 기존 퀴즈만 남았다.
+- 실패 안내 문구가 예상과 일치했다.
+- 사용자 `main.py` 직접 실행은 아직 하지 않았으며 확인 필요 상태다.
+
+### Git 상태
+
+- commit·push: 사용자 직접 확인 후 수행 예정
+- 권장 커밋 메시지: 구현 완료 안내에서 제공
+
+### 다음 작업
+
+- 사용자가 변경 내용을 확인하고 commit·push한 뒤 남은 필수 검증 순서를 정한다.
+
+---

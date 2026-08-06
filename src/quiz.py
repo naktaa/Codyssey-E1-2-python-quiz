@@ -1,12 +1,10 @@
-from collections.abc import Callable
 from dataclasses import dataclass
 
 
 @dataclass
 class Quiz:
-    """카테고리, 4지선다형 문제와 문제별 힌트를 표현한다."""
+    """4지선다형 상식 문제와 문제별 힌트를 표현한다."""
 
-    category: str
     question: str
     choices: list[str]
     answer: int
@@ -14,7 +12,6 @@ class Quiz:
 
     def __post_init__(self) -> None:
         """객체 생성 시 문자열을 정리하고 퀴즈 형식을 검증한다."""
-        self.category = self._normalize_text(self.category, "카테고리")
         self.question = self._normalize_text(self.question, "문제")
 
         if not isinstance(self.choices, list) or len(self.choices) != 4:
@@ -39,16 +36,12 @@ class Quiz:
             raise ValueError(f"{field_name}은(는) 비어 있을 수 없습니다.")
         return value.strip()
 
-    def display(
-        self,
-        output_func: Callable[[str], None] = print,
-        number: int | None = None,
-    ) -> None:
+    def display(self, number: int | None = None) -> None:
         """문제와 번호가 붙은 선택지 4개를 출력한다."""
         prefix = f"{number}. " if number is not None else ""
-        output_func(f"{prefix}{self.question}")
+        print(f"{prefix}{self.question}")
         for index, choice in enumerate(self.choices, start=1):
-            output_func(f"  {index}) {choice}")
+            print(f"  {index}) {choice}")
 
     def is_correct(self, user_answer: int) -> bool:
         """사용자가 선택한 번호가 정답인지 반환한다."""
@@ -57,7 +50,6 @@ class Quiz:
     def to_dict(self) -> dict[str, object]:
         """JSON에 저장할 수 있는 딕셔너리로 변환한다."""
         return {
-            "category": self.category,
             "question": self.question,
             "choices": self.choices.copy(),
             "answer": self.answer,
@@ -70,14 +62,13 @@ class Quiz:
         if not isinstance(data, dict):
             raise ValueError("퀴즈 데이터는 딕셔너리여야 합니다.")
 
-        required_fields = ("category", "question", "choices", "answer")
+        required_fields = ("question", "choices", "answer")
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             missing = ", ".join(missing_fields)
             raise ValueError(f"퀴즈 데이터에 필수 항목이 없습니다: {missing}")
 
         return cls(
-            category=data["category"],
             question=data["question"],
             choices=data["choices"],
             answer=data["answer"],

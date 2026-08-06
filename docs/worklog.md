@@ -1316,3 +1316,115 @@ git diff --check
 - 사용자가 변경 내용을 확인하고 commit·push한 뒤 남은 필수 검증 순서를 정한다.
 
 ---
+
+## 2026-08-06 — 단일 상식 퀴즈 구조로 단순화
+
+- 환경: macOS / zsh / Python 3.12.13
+- 브랜치: `main`
+- 목표: 카테고리 구분과 과거 테스트용 범용 입출력 주입을 제거
+- 요구사항: `TECH-02`, `TECH-05`, `FUNC-05`, `FUNC-09`, `FUNC-14`, `DATA-02`
+
+### 작업 시작 상태
+
+- `main`과 로컬 추적 기준 `origin/main`은 `a624524`에서 일치했다.
+- 작업 트리는 깨끗했다.
+- 제한 시간·자동 힌트 기능은 설계만 검토하고 구현을 보류했다.
+
+### 변경 파일
+
+- `src/quiz.py`: `category`와 출력 함수 주입을 제거하고 `print()`로 직접 출력
+- `src/default_quizzes.py`: 기본 문제의 카테고리 인자 제거
+- `src/game_manager.py`: 카테고리 선택·그룹 메서드 제거, 전체 문제 기반
+  플레이·목록·삭제, 단일 최고 점수와 직접 `input()`·`print()` 구조로 변경
+- `state.json`: 퀴즈의 `category`와 `best_scores`를 제거하고 `best_score` 사용
+- `README.md`, `docs/architecture-plan.md`, `docs/requirements.md`,
+  `docs/progress.md`: 단일 상식 퀴즈 구조와 새 JSON 스키마 반영
+
+### 기존 JSON 호환
+
+- 이전 퀴즈와 플레이 기록의 `category` 필드는 읽을 때 무시한다.
+- 이전 `best_scores` 객체의 값 중 최댓값을 단일 `best_score`로 이전한다.
+- 다음 저장부터 카테고리 필드가 없는 새 스키마로 기록한다.
+
+### 실행 명령과 실제 결과
+
+```zsh
+python3 -c 'import json; from pathlib import Path; files=[Path("main.py"), *Path("src").glob("*.py")]; [compile(p.read_text(encoding="utf-8"), str(p), "exec") for p in files]; state=json.loads(Path("state.json").read_text(encoding="utf-8")); assert "best_score" in state and "best_scores" not in state; assert all("category" not in quiz for quiz in state["quizzes"]); print(f"Python syntax OK: {len(files)} files"); print("single-quiz state schema OK")'
+python3 - <<'PY'
+import json
+import tempfile
+from contextlib import redirect_stdout
+from io import StringIO
+from pathlib import Path
+from unittest.mock import patch
+
+from src.default_quizzes import get_default_quizzes
+from src.game_manager import QuizGame
+
+legacy_state = {
+    "quizzes": [{
+        "category": "과학",
+        "question": "물의 화학식은 무엇인가요?",
+        "choices": ["CO2", "H2O", "O2", "NaCl"],
+        "answer": 2,
+        "hint": "물 힌트",
+    }],
+    "best_scores": {"과학": 4, "역사": 7},
+    "score_history": [{
+        "played_at": "2026-08-05 21:34",
+        "category": "과학",
+        "score": 4,
+        "max_score": 6,
+        "correct_count": 2,
+        "total_count": 2,
+        "hint_count": 1,
+    }],
+}
+
+with tempfile.TemporaryDirectory() as temp_dir:
+    state_path = Path(temp_dir) / "state.json"
+    state_path.write_text(json.dumps(legacy_state, ensure_ascii=False), encoding="utf-8")
+    game = QuizGame(get_default_quizzes(), state_path)
+    assert game.load_state() is True
+    assert game.best_score == 7
+    assert not hasattr(game.quizzes[0], "category")
+    assert "category" not in game.score_history[0]
+
+    answers = ["새 문제", "가", "나", "다", "라", "2", "새 힌트"]
+    with patch("builtins.input", side_effect=answers), redirect_stdout(StringIO()):
+        assert game.add_quiz() is True
+
+    with patch("src.game_manager.random.sample", return_value=[game.quizzes[0]]):
+        with patch("builtins.input", side_effect=["1", "2", "2"]):
+            with redirect_stdout(StringIO()):
+                assert game.play_quizzes() == 3
+
+    saved = json.loads(state_path.read_text(encoding="utf-8"))
+    assert "best_score" in saved and "best_scores" not in saved
+    assert all("category" not in quiz for quiz in saved["quizzes"])
+    assert all("category" not in record for record in saved["score_history"])
+
+print("legacy migration, add, play, score save OK")
+PY
+git diff --check
+```
+
+- Python 파일 5개 문법과 추적 `state.json`의 새 스키마가 정상이다.
+- 구형 카테고리 JSON에서 최고 점수 7점과 플레이 기록을 복원했다.
+- 새 퀴즈 추가와 전체 목록 기반 플레이 후 새 스키마 저장을 확인했다.
+- 직접 `input()`을 패치한 임시 검사에서 추가 저장 실패, 삭제 저장 실패의
+  메모리 롤백과 마지막 퀴즈 삭제 시 단일 최고 점수 초기화를 확인했다.
+- `git diff --check`에서 공백 오류가 발견되지 않았다.
+- 실제 `main.py` 사용자 실행은 아직 하지 않았으며 확인 필요 상태다.
+
+### Git 상태
+
+- commit·push: 사용자 직접 확인 후 수행 예정
+- 권장 커밋 메시지: `Refactor: 상식 퀴즈 구조 단순화`
+
+### 다음 작업
+
+- 사용자가 확인용 상태로 카테고리 없는 추가·목록·플레이·삭제·점수 흐름을
+  직접 확인한다.
+
+---

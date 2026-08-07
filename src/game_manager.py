@@ -1,28 +1,9 @@
-import json
-import os
 import random
-import shutil
 from datetime import datetime
-from pathlib import Path
 
 from .quiz import Quiz
+from .state_manager import StateManager, get_state_path
 from .timed_input import TimedTerminalInput
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_STATE_PATH = PROJECT_ROOT / "state.json"
-TEST_STATE_PATH = PROJECT_ROOT / "state.test.json"
-STATE_MODE_ENV = "QUIZ_STATE_MODE"
-
-
-def get_state_path() -> Path:
-    """실행 모드에 맞는 실제 또는 테스트 상태 파일 경로를 반환한다."""
-    state_mode = os.getenv(STATE_MODE_ENV, "real").strip().casefold()
-    if state_mode == "real":
-        return DEFAULT_STATE_PATH
-    if state_mode == "test":
-        return TEST_STATE_PATH
-    raise ValueError(f"{STATE_MODE_ENV}는 real 또는 test여야 합니다.")
 
 
 class QuizGame:
@@ -43,15 +24,16 @@ class QuizGame:
     def __init__(
         self,
         quizzes: list[Quiz] | None = None,
-        state_path: Path | None = None,
+        state_manager: StateManager | None = None,
     ) -> None:
         # 전달받은 목록을 복사해 게임 밖의 목록 변경과 상태를 분리한다.
         self.quizzes = list(quizzes) if quizzes is not None else []
-        self._default_quizzes = list(self.quizzes)
         self.best_score: int | None = None
         self.score_history: list[dict[str, str | int]] = []
-        self.state_path = state_path or get_state_path()
-        self._state_save_enabled = True
+        self.state_manager = state_manager or StateManager(
+            state_path=get_state_path(),
+            default_quizzes=self.quizzes,
+        )
         self.timed_input = TimedTerminalInput()
 
     def show_menu(self) -> None:
@@ -100,212 +82,20 @@ class QuizGame:
             print("y 또는 n을 입력해 주세요.")
 
     def save_state(self) -> bool:
-        """현재 퀴즈, 최고 점수와 플레이 기록을 JSON 파일에 저장한다."""
-        if not self._state_save_enabled:
-            print("원본 상태 파일을 보호하기 위해 저장하지 않았습니다.")
-            return False
-
-        state = {
-            "quizzes": [quiz.to_dict() for quiz in self.quizzes],
-            "best_score": self.best_score,
-            "score_history": self.score_history,
-        }
-        temp_path = self.state_path.with_name(f"{self.state_path.name}.tmp")
-
-        try:
-            with temp_path.open("w", encoding="utf-8", newline="\n") as file:
-                json.dump(state, file, ensure_ascii=False, indent=2)
-                file.write("\n")
-            temp_path.replace(self.state_path)
-        except OSError as error:
-            self.remove_temp_state(temp_path)
-            error_message = error.strerror or "알 수 없는 파일 오류"
-            print(f"상태 파일을 저장하지 못했습니다: {error_message}")
-            return False
-
-        return True
-
-    def remove_temp_state(self, temp_path: Path) -> None:
-        """저장 실패 후 남은 임시 상태 파일을 가능한 범위에서 정리한다."""
-        try:
-            temp_path.unlink(missing_ok=True)
-        except OSError:
-            pass
-
-    def validate_state_data(
-        self,
-        state: object,
-    ) -> tuple[
-        list[Quiz],
-        int | None,
-        list[dict[str, str | int]],
-    ]:
-        """불러온 JSON 구조를 검증해 게임 상태로 변환한다."""
-        if not isinstance(state, dict):
-            raise ValueError("상태 데이터는 객체 형식이어야 합니다.")
-
-        quizzes_data = state.get("quizzes")
-        score_history_data = state.get("score_history", [])
-        if not isinstance(quizzes_data, list):
-            raise ValueError("quizzes는 목록이어야 합니다.")
-        if not isinstance(score_history_data, list):
-            raise ValueError("score_history는 목록이어야 합니다.")
-
-        loaded_quizzes = [Quiz.from_dict(data) for data in quizzes_data]
-        if "best_score" in state:
-            loaded_score = state["best_score"]
-            if loaded_score is not None and (
-                isinstance(loaded_score, bool)
-                or not isinstance(loaded_score, int)
-                or loaded_score < 0
-            ):
-                raise ValueError("best_score는 null 또는 0 이상의 정수여야 합니다.")
-        else:
-            # 카테고리 스키마의 점수 중 최댓값을 단일 최고 점수로 이전한다.
-            legacy_scores = state.get("best_scores")
-            if not isinstance(legacy_scores, dict):
-                raise ValueError("best_score는 null 또는 0 이상의 정수여야 합니다.")
-            scores: list[int] = []
-            for category, score in legacy_scores.items():
-                if not isinstance(category, str) or not category.strip():
-                    raise ValueError("기존 최고 점수의 카테고리가 올바르지 않습니다.")
-                if (
-                    isinstance(score, bool)
-                    or not isinstance(score, int)
-                    or score < 0
-                ):
-                    raise ValueError("기존 최고 점수는 0 이상의 정수여야 합니다.")
-                scores.append(score)
-            loaded_score = max(scores, default=None)
-
-        loaded_history = [
-            self.validate_score_history(record)
-            for record in score_history_data
-        ]
-        return loaded_quizzes, loaded_score, loaded_history
-
-    def validate_score_history(
-        self,
-        record: object,
-    ) -> dict[str, str | int]:
-        """플레이 기록 한 건의 필드와 값 범위를 검증한다."""
-        if not isinstance(record, dict):
-            raise ValueError("플레이 기록은 객체여야 합니다.")
-
-        played_at = record.get("played_at")
-        if not isinstance(played_at, str):
-            raise ValueError("플레이 기록 시간은 문자열이어야 합니다.")
-        try:
-            datetime.strptime(played_at, "%Y-%m-%d %H:%M")
-        except ValueError as error:
-            raise ValueError(
-                "플레이 기록 시간은 YYYY-MM-DD HH:MM 형식이어야 합니다."
-            ) from error
-        number_fields = {
-            "score": record.get("score"),
-            "max_score": record.get("max_score"),
-            "correct_count": record.get("correct_count"),
-            "total_count": record.get("total_count"),
-            "hint_count": record.get("hint_count"),
-        }
-        for field_name, value in number_fields.items():
-            if isinstance(value, bool) or not isinstance(value, int):
-                raise ValueError(f"플레이 기록의 {field_name}은 정수여야 합니다.")
-
-        score = number_fields["score"]
-        max_score = number_fields["max_score"]
-        correct_count = number_fields["correct_count"]
-        total_count = number_fields["total_count"]
-        hint_count = number_fields["hint_count"]
-        if total_count < 1 or max_score < 1:
-            raise ValueError("플레이 기록의 문제 수와 만점은 1 이상이어야 합니다.")
-        if not 0 <= score <= max_score:
-            raise ValueError("플레이 기록의 점수가 올바르지 않습니다.")
-        if not 0 <= correct_count <= total_count:
-            raise ValueError("플레이 기록의 정답 수가 올바르지 않습니다.")
-        if not 0 <= hint_count <= total_count:
-            raise ValueError("플레이 기록의 힌트 수가 올바르지 않습니다.")
-
-        return {
-            "played_at": played_at,
-            "score": score,
-            "max_score": max_score,
-            "correct_count": correct_count,
-            "total_count": total_count,
-            "hint_count": hint_count,
-        }
-
-    def backup_corrupted_state(self) -> Path | None:
-        """손상된 상태 파일을 timestamp가 붙은 이름으로 복사한다."""
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-        backup_path = self.state_path.with_name(
-            f"{self.state_path.name}.corrupt-{timestamp}"
+        """현재 게임 상태를 StateManager에 전달해 저장한다."""
+        return self.state_manager.save_state(
+            self.quizzes,
+            self.best_score,
+            self.score_history,
         )
-        try:
-            shutil.copy2(self.state_path, backup_path)
-        except OSError as error:
-            error_message = error.strerror or "알 수 없는 파일 오류"
-            print(f"손상된 상태 파일을 백업하지 못했습니다: {error_message}")
-            return None
-        return backup_path
 
-    def recover_corrupted_state(self) -> bool:
-        """손상 원본을 백업하고 기본 상태 파일을 만든다."""
-        backup_path = self.backup_corrupted_state()
-        if backup_path is None:
-            self._state_save_enabled = False
-            print("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
-            return False
-
-        self.quizzes = list(self._default_quizzes)
-        self.best_score = None
-        self.score_history = []
-        print(f"손상된 상태 파일을 백업했습니다: {backup_path.name}")
-
-        if self.save_state():
-            print("기본 데이터로 상태 파일을 복구했습니다.")
-            return True
-
-        print("기본 데이터로 실행하지만 상태 파일은 복구하지 못했습니다.")
-        return False
-
-    def load_state(self) -> bool:
-        """상태 파일이 있으면 퀴즈와 최고 점수를 복원한다."""
-        if not self.state_path.exists():
-            return self.save_state()
-
-        try:
-            with self.state_path.open("r", encoding="utf-8") as file:
-                state = json.load(file)
-            loaded_quizzes, loaded_score, loaded_history = (
-                self.validate_state_data(state)
-            )
-        except OSError as error:
-            self._state_save_enabled = False
-            error_message = error.strerror or "알 수 없는 파일 오류"
-            print(f"상태 파일을 불러오지 못했습니다: {error_message}")
-            print("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
-            return False
-        except (json.JSONDecodeError, UnicodeError, TypeError, ValueError) as error:
-            print(f"상태 파일이 손상되었습니다: {error}")
-            return self.recover_corrupted_state()
-
-        self.restore_missing_default_hints(loaded_quizzes)
-        self.quizzes = loaded_quizzes
-        self.best_score = loaded_score
-        self.score_history = loaded_history
-        return True
-
-    def restore_missing_default_hints(self, quizzes: list[Quiz]) -> None:
-        """기존 JSON의 기본 문제에 누락된 힌트를 기본 데이터에서 보완한다."""
-        default_hints = {
-            quiz.question.casefold(): quiz.hint
-            for quiz in self._default_quizzes
-            if quiz.hint is not None
-        }
-        for quiz in quizzes:
-            if quiz.hint is None:
-                quiz.hint = default_hints.get(quiz.question.casefold())
+    def load_state(self) -> None:
+        """StateManager에서 상태를 불러와 현재 게임에 반영한다."""
+        (
+            self.quizzes,
+            self.best_score,
+            self.score_history,
+        ) = self.state_manager.load_state()
 
     def add_quiz(self) -> bool:
         """새 퀴즈를 추가하고 저장하며 실패하면 메모리 변경을 되돌린다."""

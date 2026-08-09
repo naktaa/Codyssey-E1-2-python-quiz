@@ -58,7 +58,7 @@
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/`·`evidence/screenshots/` | Python·Git·VSCode 표시 | 초기 환경 화면·VSCode Git 그래프 | 1 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
-| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 확보 | 필수 | `evidence/logs/` | 기능별 직접 실행과 평가 체크리스트 시연 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 13, 16 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
+| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 확보 | 필수 | `evidence/logs/` | 기능별 직접 실행과 평가 체크리스트 시연 | [화면 변경 전 직접 실행 기록](../evidence/logs/final-game-verification.md)·[현재 점수 회귀 검사](../evidence/logs/current-score-regression.md) | 13, 16 | `Docs: README와 제출 증거 정리` | 부분 검증, 최신 플레이 증거 필요 |
 | EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 부분 검증 |
 | EVID-04 | Git 브랜치·병합 그래프 확보 | 필수 | `evidence/screenshots/` | 최신 main과 기능 브랜치 분기·병합 확인 | [VSCode Git 그래프](../evidence/screenshots/git-log.png) | 16 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
 | EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/logs/`·worklog | 기존 두 환경의 로컬 reflog 확인 | [clone·push·pull 기록](../evidence/logs/clone-pull.md) | 15 | `Docs: clone 실습 확인 문구 추가` | 증거 확보 완료 |
@@ -73,7 +73,7 @@
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 독립 실행해 순서 변화 확인 | 작업 로그·플레이 화면 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 증거 확보 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
-| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 5초 전 3점·후 2점 차감 확인 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 증거 확보 완료 |
+| BONUS-03 | 자동 힌트, 정답 점수 차감과 현재 점수 표시 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 5초 전 정답 3점·힌트 후 정답 1점·오답과 시간 초과 0점 및 문제별 현재 점수 확인 | [화면 변경 전 직접 실행 기록](../evidence/logs/final-game-verification.md)·[현재 점수 회귀 검사](../evidence/logs/current-score-regression.md) | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 실행 검증 완료, 최신 직접 증거 필요 |
 | BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `GameManager.delete_quiz()`·`StateManager.save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `GameManager.record_game_result()`·`StateManager` JSON 스키마 | 점수 기록 6개 저장 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
 | BONUS-06 | 문제별 10초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 10초, 5초 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 증거 확보 완료 |

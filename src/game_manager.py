@@ -214,24 +214,19 @@ class GameManager:
                 hint_count += 1
 
             if answer_result.answer is None:
-                print("시간 초과입니다. 0점입니다.")
-                continue
-
-            if quiz.is_correct(answer_result.answer):
+                print("시간 초과입니다.")
+            elif quiz.is_correct(answer_result.answer):
                 correct_count += 1
-                hint_penalty = (
-                    self.HINT_PENALTY
-                    if answer_result.hint_shown
-                    else 0
-                )
-                earned_points = self.CORRECT_POINTS - hint_penalty
-                score += earned_points
-                print(f"정답입니다! {earned_points}점을 획득했습니다.")
+                score += self.CORRECT_POINTS
+                if answer_result.hint_shown:
+                    score -= self.HINT_PENALTY
+                print("정답입니다!")
             else:
                 correct_choice = quiz.choices[quiz.answer - 1]
                 print(
                     f"오답입니다. 정답은 {quiz.answer}번 {correct_choice}입니다."
                 )
+            print(f"현재 점수: {score}점")
 
         self.show_section("퀴즈 결과")
         print(f"정답 수: {correct_count}/{total_count}")
@@ -295,25 +290,21 @@ class GameManager:
 
     def run(self) -> None:
         """종료 메뉴를 선택할 때까지 메인 메뉴를 반복 실행한다."""
+        menu_actions = {
+            1: self.play_quizzes,
+            2: self.list_quizzes,
+            3: self.show_score_records,
+            4: self.add_quiz,
+            5: self.delete_quiz,
+            6: self.safe_exit,
+        }
         try:
             while True:
                 self.show_menu()
                 choice = self.read_int("메뉴 선택(1~6): ", 1, 6)
-
+                menu_actions[choice]()
                 if choice == 6:
-                    self.safe_exit()
                     return
-
-                if choice == 1:
-                    self.play_quizzes()
-                elif choice == 2:
-                    self.list_quizzes()
-                elif choice == 3:
-                    self.show_score_records()
-                elif choice == 4:
-                    self.add_quiz()
-                elif choice == 5:
-                    self.delete_quiz()
         # 모든 메뉴 기능에서 발생한 입력 중단을 함께 처리한다.
         except (KeyboardInterrupt, EOFError):
             self.safe_exit(interrupted=True)

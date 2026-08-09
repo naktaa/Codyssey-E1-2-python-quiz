@@ -50,7 +50,7 @@ class StateManager:
 
         try:
             with temp_path.open("w", encoding="utf-8", newline="\n") as file:
-                json.dump(state_data, file, ensure_ascii=False, indent=2)
+                json.dump(state_data, file, ensure_ascii=False, indent=4)
                 file.write("\n")
             temp_path.replace(self.state_path)
         except OSError as error:
@@ -119,10 +119,16 @@ class StateManager:
 
     def backup_corrupted_state(self) -> Path | None:
         """손상된 상태 파일을 timestamp가 붙은 이름으로 복사한다."""
-        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         backup_path = self.state_path.with_name(
             f"{self.state_path.name}.corrupt-{timestamp}"
         )
+        collision_number = 1
+        while backup_path.exists():
+            backup_path = self.state_path.with_name(
+                f"{self.state_path.name}.corrupt-{timestamp}-{collision_number}"
+            )
+            collision_number += 1
         try:
             shutil.copy2(self.state_path, backup_path)
         except OSError as error:

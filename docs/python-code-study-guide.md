@@ -814,11 +814,14 @@ shutil.copy2(self.state_path, backup_path)
 백업 파일 이름에는 현재 시각을 넣는다.
 
 ```python
-timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 ```
 
 - `datetime.now()`: 현재 로컬 날짜와 시각
 - `strftime()`: 날짜와 시각을 지정한 형식의 문자열로 변환
+
+백업 파일명은 초 단위까지만 사용한다. 같은 초에 같은 이름의 백업이 이미 있으면
+`-1`, `-2`처럼 순번을 붙여 기존 백업을 덮어쓰지 않는다.
 
 백업에 실패하면 손상 원본을 덮어쓰지 않도록 저장을 비활성화한다.
 
@@ -834,11 +837,21 @@ self._save_enabled = False
 
 ```python
 def run(self) -> None:
+    menu_actions = {
+        1: self.play_quizzes,
+        2: self.list_quizzes,
+        3: self.show_score_records,
+        4: self.add_quiz,
+        5: self.delete_quiz,
+        6: self.safe_exit,
+    }
     try:
         while True:
             self.show_menu()
-            choice = self.read_int("메뉴를 선택하세요: ", 1, 6)
-            ...
+            choice = self.read_int("메뉴 선택(1~6): ", 1, 6)
+            menu_actions[choice]()
+            if choice == 6:
+                return
     except (KeyboardInterrupt, EOFError):
         self.safe_exit(interrupted=True)
 ```
@@ -921,26 +934,33 @@ if minimum <= value <= maximum:
 ## 14. 메뉴 기능 선택
 
 ```python
-if choice == 6:
-    self.safe_exit()
-    return
+menu_actions = {
+    1: self.play_quizzes,
+    2: self.list_quizzes,
+    3: self.show_score_records,
+    4: self.add_quiz,
+    5: self.delete_quiz,
+    6: self.safe_exit,
+}
 
-if choice == 1:
-    self.play_quizzes()
-elif choice == 2:
-    self.list_quizzes()
-elif choice == 3:
-    self.show_score_records()
-elif choice == 4:
-    self.add_quiz()
-elif choice == 5:
-    self.delete_quiz()
+menu_actions[choice]()
 ```
 
-`if`와 `elif`는 사용자가 입력한 번호에 따라 실행할 기능을 선택한다.
+Python에서는 함수와 메서드도 변수에 담을 수 있는 객체다. 딕셔너리 값에 실제로
+호출할 메서드를 저장하고, 입력 번호를 키로 사용해 선택한 메서드를 가져온다.
+
+```python
+menu_actions[1]    # self.play_quizzes 메서드 객체
+menu_actions[1]()  # 메서드 호출
+```
+
+C의 함수 포인터와 목적이 비슷하지만 Python에서는 별도의 포인터 문법 없이 함수와
+메서드 자체를 값으로 저장한다. 메뉴 기능을 추가할 때 긴 `if/elif` 분기를 늘리지
+않고 딕셔너리에 번호와 메서드를 추가할 수 있다.
 
 조회·추가·삭제·플레이 메서드가 끝나면 `while True`의 처음으로 돌아간다. 종료
-메뉴에서는 `return`으로 `run()` 자체를 끝낸다.
+메서드도 딕셔너리를 통해 실행한다. 다만 `safe_exit()`은 안내와 저장만 담당하므로,
+6번 실행 후에는 `return`으로 `run()` 반복도 끝낸다.
 
 ---
 
@@ -1183,35 +1203,27 @@ ANSI 제어 문자는 현재 줄을 지우거나 커서를 이동해 카운트�
 
 ## 19. 정답 판정과 점수 계산
 
-시간 초과이면 다음 문제로 이동한다.
+점수는 0에서 시작하고 각 문제 결과를 처리할 때 바로 변경한다.
+
+```python
+score = 0
+```
+
+시간 초과, 정답과 오답을 하나의 `if/elif/else` 흐름으로 처리한다.
 
 ```python
 if answer_result.answer is None:
-    print("시간 초과입니다. 0점입니다.")
-    continue
-```
-
-`continue`는 현재 문제의 남은 코드를 건너뛰고 `for` 반복의 다음 문제로 이동한다.
-
-정답이면 기본 점수에서 힌트 사용에 따른 차감 점수를 계산한다.
-
-```python
-hint_penalty = (
-    self.HINT_PENALTY
-    if answer_result.hint_shown
-    else 0
-)
-earned_points = self.CORRECT_POINTS - hint_penalty
-```
-
-일반 조건문으로 풀면 다음과 같다.
-
-```python
-if answer_result.hint_shown:
-    hint_penalty = 2
+    print("시간 초과입니다.")
+elif quiz.is_correct(answer_result.answer):
+    correct_count += 1
+    score += self.CORRECT_POINTS
+    if answer_result.hint_shown:
+        score -= self.HINT_PENALTY
+    print("정답입니다!")
 else:
-    hint_penalty = 0
-earned_points = 3 - hint_penalty
+    print("오답입니다.")
+
+print(f"현재 점수: {score}점")
 ```
 
 점수는 클래스 상수로 정의되어 있다.
@@ -1221,17 +1233,12 @@ CORRECT_POINTS = 3
 HINT_PENALTY = 2
 ```
 
-숫자의 의미를 이름으로 보여주고 점수 규칙을 한곳에서 수정하기 위해서다.
+숫자의 의미를 이름으로 보여주고 점수 규칙을 한곳에서 수정하기 위해서다. 정답이면
+현재 점수에 3점을 더하고, 그 정답에서 힌트를 봤다면 바로 2점을 차감한다.
 
-```python
-score += earned_points
-```
-
-는 다음 코드의 축약형이다.
-
-```python
-score = score + earned_points
-```
+차감 코드는 정답 분기 안에만 있다. 따라서 힌트를 봤더라도 오답이거나 시간 초과이면
+점수가 바뀌지 않는다. 문제별 처리가 끝날 때 공통으로 현재 누적 점수를 출력하므로
+사용자는 진행 중에도 게임 상태를 확인할 수 있다.
 
 오답이면 사용자 정답 번호를 리스트 인덱스로 바꿔 정답 선택지를 찾는다.
 
@@ -1310,7 +1317,7 @@ temp_path = self.state_path.with_name(f"{self.state_path.name}.tmp")
 
 ```python
 with temp_path.open("w", encoding="utf-8", newline="\n") as file:
-    json.dump(state_data, file, ensure_ascii=False, indent=2)
+    json.dump(state_data, file, ensure_ascii=False, indent=4)
     file.write("\n")
 temp_path.replace(self.state_path)
 ```
@@ -1318,7 +1325,7 @@ temp_path.replace(self.state_path)
 - `"w"`: 쓰기 모드
 - `encoding="utf-8"`: 한글 저장
 - `ensure_ascii=False`: 한글을 `\u...` 형태로 바꾸지 않음
-- `indent=2`: 사람이 읽기 쉽도록 들여쓰기 2칸
+- `indent=4`: 사람이 읽기 쉽도록 들여쓰기 4칸
 - `replace()`: 완성된 임시 파일을 실제 상태 파일로 교체
 
 실제 파일에 바로 쓰다가 중단되면 기존 파일까지 손상될 수 있다. 임시 파일을 완성한

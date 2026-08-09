@@ -5,9 +5,11 @@
 - 브랜치: `main`
 - 최신 기능 커밋:
   `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선`
-- 점검 시작 시 `main`과 `origin/main`은 `9d76c98`에서 동기화 상태
-- 현재 작업: 최신 코드·Git·문서 상태 정합성 점검
-- 상태: 기능 commit·push와 로컬 TTY 검증 완료, 사용자 직접 확인과 최신 증거 예정
+- 최신 문서 커밋:
+  `9403a8a Docs: 최신 기능 커밋과 검증 상태 갱신`
+- 점검 시작 시 `main`과 `origin/main`은 `9403a8a`에서 동기화 상태
+- 현재 작업: 사용자 직접 실행·Git 그래프·clone·pull 증거 반영
+- 상태: 기능 구현과 사용자 직접 실행 완료, 최종 문서 정리 중
 - 테스트 상태는 `python3 main.py --test`로 선택
 - 플레이 기록은 플레이 시각과 점수만 저장
 
@@ -68,7 +70,10 @@
 - `힌트 사용 횟수`와 `최종 점수` 출력 및 최종 점수 저장 확인
 - 시간 초과 후 메뉴 복귀와 Ctrl+C 안전 종료 확인
 - 기능과 문서는 `9d76c98`로 commit·push 완료
-- 사용자가 직접 실행한 현재 화면과 결과 캡처는 아직 필요
+- 사용자가 `py --test`로 현재 메뉴부터 정상 종료까지 직접 실행했다.
+- 긴 터미널 과정은 `evidence/logs/final-game-verification.md`에 기능별로 정리했다.
+- 현재 실행에서 힌트 후 정답 1점, 힌트 전 정답 3점, 오답 0점과 최종 4점,
+  최고 점수 7점·최근 5개 기록을 확인했다.
 
 ## 구조 단순화 검증
 
@@ -111,28 +116,29 @@
 ## 기존 확보 증거
 
 - 초기 Git 설정: `evidence/git/git-verification.md`, `evidence/git/git-log.png`
-- 개선 전 메뉴: `evidence/screenshots/main-menu.png`
 - 개선 전 20초 제한 시간·10초 자동 힌트:
   `evidence/screenshots/game-play.png`
 - 안전 종료: `evidence/logs/safe-exit.md`
 - 최고 점수 재실행: `evidence/logs/persistence-restart.md`
 - 손상 JSON 복구: `evidence/logs/json-recovery.md`
+- 현재 메뉴·추가·목록·10초·5초 플레이·점수·삭제·종료:
+  `evidence/logs/final-game-verification.md`
+- 최신 `main`과 기능 브랜치 분기·병합 그래프:
+  `evidence/screenshots/git-log.png`
+- 기존 두 작업 환경의 clone·push·pull reflog:
+  `evidence/logs/clone-pull.md`
 - 브랜치 병합 이력: `feature/solving`, `state-json`, `feature/bonus`,
   `Test/time-limit`
 - 의미 있는 커밋 10개 이상 확보
 
-## 남은 필수 확인
+## 남은 최종 확인
 
-- macOS zsh에서 README 동료평가 순서 최종 실행
-- 현재 구조에서 추가 퀴즈와 점수의 종료·재실행 영속성 원본 증거
-- 추가·목록·플레이 결과·점수 화면 최종 확보
-- 메뉴 구분과 10초·5초 규칙을 반영한 현재 화면 확보
-- 최종 Git 그래프 확보
-- 별도 디렉터리 clone·push 후 기존 작업 폴더 pull 반영 증거
-- 전체 제출물 비밀값 최종 점검
+- 평가 시 README 기능 체크리스트 순서로 게임 직접 시연
+- 현재 구조에서 추가 퀴즈의 종료·재실행 영속성 원본 증거는 필요 시 보완
+- 추가 퀴즈 재실행 증거를 생략할 경우 평가 현장에서 직접 확인
+- 문서·증거 commit과 push 후 원격 저장소 최종 상태 확인
 
 ## 다음 작업
 
-사용자가 `python3 main.py --test`로 현재 메뉴, 10초·5초 타이머와 3점·1점 결과를
-직접 확인하고 최신 화면을 확보한다. 이후 영속성·Git 그래프·clone·pull 증거와
-최종 제출물을 정리한다.
+이번 직접 실행과 Git 증거를 반영한 문서를 검사하고 commit·push한다. 이후 평가
+현장에서는 README 체크리스트에 따라 게임을 직접 시연한다.

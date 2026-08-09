@@ -234,13 +234,16 @@ JSON은 UTF-8, 한글 유지, 들여쓰기 2칸 형식으로 저장한다.
 | 확인 내용 | 자료 |
 |---|---|
 | 초기 환경과 Git 설정 | [Git 확인 기록](evidence/git/git-verification.md) |
-| 개선 전 메뉴 | [메뉴 화면](evidence/screenshots/main-menu.png) |
 | 개선 전 20초·10초 플레이 | [게임 화면](evidence/screenshots/game-play.png) |
+| 현재 메뉴·추가·목록·플레이·점수·삭제 | [최종 게임 직접 실행 기록](evidence/logs/final-game-verification.md) |
 | 안전 종료 | [안전 종료 기록](evidence/logs/safe-exit.md) |
 | 최고 점수 재실행 유지 | [영속성 기록](evidence/logs/persistence-restart.md) |
 | 손상 JSON 백업·복구 | [복구 기록](evidence/logs/json-recovery.md) |
+| 최종 브랜치·병합 그래프 | [VSCode Git 그래프](evidence/screenshots/git-log.png) |
+| clone·push·pull 사용 | [로컬 reflog 확인 기록](evidence/logs/clone-pull.md) |
 
-메뉴 구분과 10초·5초 규칙을 반영한 현재 화면은 사용자 직접 확인 후 다시 확보한다.
+현재 기능은 긴 터미널 실행 과정을 화면별로 나누는 대신 기능별 직접 실행 로그로
+정리했다. 평가 시에는 위 기능 체크리스트 순서로 실제 게임을 함께 실행한다.
 
 개발 과정과 요구사항별 검증 상태는 다음 문서에서 확인할 수 있다.
 

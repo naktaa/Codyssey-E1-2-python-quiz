@@ -46,6 +46,67 @@
 
 ---
 
+## 2026-08-09 — 최종 게임 실행과 Git 증거 정리
+
+- 환경: macOS / zsh / Python 3.12.13
+- 브랜치: `main`
+- 목표: 사용자의 현재 기능 직접 실행 기록과 최신 Git 그래프, 기존 두 환경의
+  clone·push·pull 이력을 제출 증거로 정리한다.
+
+### 사용자 직접 실행
+
+- 사용자가 `py --test`로 `state.test.json`을 사용하는 전체 게임 흐름을 실행했다.
+- 긴 콘솔 출력은 반복되는 메인 메뉴를 줄이고 기능별로 나눠
+  `evidence/logs/final-game-verification.md`에 기록했다.
+- 직접 확인된 항목:
+  - 메뉴 1~6과 테스트 상태 분리
+  - 문제·선택지 4개·정답·힌트를 포함한 퀴즈 추가
+  - 빈 힌트 입력 거부와 재입력
+  - 추가 직후 목록의 5개에서 6개 증가
+  - 6개 중 3개 무작위 출제
+  - 10초 제한 시간과 5초 자동 힌트
+  - 힌트 후 정답 1점, 힌트 전 정답 3점, 오답 0점
+  - 정답 수 2/3, 힌트 1회, 최종 점수 4점
+  - 최고 점수 7점과 최근 플레이 5건
+  - 추가한 문제 삭제 후 기본 5개 목록 복원
+  - 정상 종료
+- 추가한 문제는 같은 실행에서 삭제했으므로 추가 퀴즈의 종료 후 재실행 복원은
+  이번 기록으로 검증하지 않았다. 시작 시 이전 최고 점수 7점 복원은 확인했다.
+
+### Git 그래프
+
+- 새 `evidence/screenshots/git-log.png`를 직접 확인했다.
+- VSCode 그래프에 최신 `main`과 `origin/main`의 `9403a8a`, `Test/time-limit`,
+  `feature/bonus`, `state-json`의 분기와 병합이 표시된다.
+- 기존 `evidence/screenshots/git-merge.png`는 초기 병합 과정 증거로 유지한다.
+- 현재 기능을 최종 로그로 대체하면서 이전 메뉴·목록·안전 종료 화면 4개가
+  정리됐다. README의 끊어진 화면 링크는 새 로그 또는 기존 텍스트 증거로 교체했다.
+
+### clone·push·pull 기록
+
+다음 로컬 reflog 명령으로 기존 두 환경에서의 실제 Git 흐름을 확인했다.
+
+```zsh
+git reflog show HEAD --date=iso | rg 'clone:|pull .*Fast-forward'
+git reflog show origin/main --date=iso | rg 'update by push|fetch: fast-forward'
+```
+
+- 2026-08-05 GitHub 저장소 clone 기록
+- 2026-08-06과 2026-08-09 원격 `main` Fast-forward pull 기록
+- `origin/main`으로 수행한 여러 push 기록
+- reflog는 원격에 저장되지 않으므로 실제 출력을 `evidence/logs/clone-pull.md`에
+  보존했다. 별도의 세 번째 컴퓨터에서 clone 작업을 반복하지 않는다.
+
+### 최종 검사
+
+- Python 구문과 `state.json` JSON 형식 검사가 통과했다.
+- `git diff --check`가 통과했다.
+- README와 문서의 로컬 Markdown 링크를 검사하고 삭제된 화면 참조를 정리했다.
+- 텍스트 제출물에서 개인 절대 경로, 이메일, 토큰·키 형식이 발견되지 않았다.
+- 다음 작업은 문서와 증거를 commit·push하고 원격 상태를 확인하는 것이다.
+
+---
+
 ## 2026-08-09 — 최신 기능 커밋 이후 문서 상태 동기화
 
 - 환경: macOS / zsh / Python 3.12.13

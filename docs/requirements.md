@@ -18,12 +18,12 @@
 |---|---|---|---|---|---|---:|---|---|
 | ENV-01 | Python 3.10 이상 사용 | 필수 | 개발 환경 | `python3 --version` | 환경 스크린샷 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | ENV-02 | 외부 라이브러리 없이 표준 라이브러리만 사용 | 필수 | 전체 코드 | import 목록과 직접 실행 확인 | 최종 검증 로그 | 13 | `Docs: 직접 실행 검증 결과 기록` | 실행 검증 완료 |
-| ENV-03 | macOS zsh에서 최종 재현 | 필수 | 전체 프로젝트 | README 절차로 새 터미널 실행 | 최종 검증 로그 | 16 | `Docs: macOS 최종 재현 기록` | 예정 |
+| ENV-03 | macOS zsh에서 최종 재현 | 필수 | 전체 프로젝트 | README 절차로 새 터미널 실행 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 16 | `Docs: macOS 최종 재현 기록` | 증거 확보 완료 |
 | GIT-01 | GitHub 새 저장소와 로컬 저장소 설정 | 필수 | Git 저장소 | `git remote -v`, GitHub 확인 | 환경 또는 저장소 화면 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | GIT-02 | `.gitignore`, `README.md` 생성 후 첫 commit·push | 필수 | 루트 문서 | `git log -1`, 원격 저장소 | Git 로그 | 1 | `Chore: 프로젝트 초기 파일 구성` | 문서 반영 완료 |
 | GIT-03 | 의미 있는 커밋 10개 이상 | 필수 | Git 이력 | `git rev-list --count HEAD` | Git 그래프 | 14 | 기능 단위 커밋 | 실행 검증 완료 |
 | GIT-04 | main 외 브랜치 생성·작업·병합 1회 이상 | 필수 | `feature/solving` | `git log --graph --all` | Git 그래프 | 5~6 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
-| GIT-05 | `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone` 각 1회 이상 사용 | 필수 | Git 작업 기록 | 터미널 기록·worklog 확인 | clone·pull 스크린샷 | 1, 5, 15 | 각 단계 커밋 | 구현 중 |
+| GIT-05 | `init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone` 각 1회 이상 사용 | 필수 | Git 작업 기록 | 터미널 기록·worklog 확인 | [clone·push·pull reflog](../evidence/logs/clone-pull.md) | 1, 5, 15 | 각 단계 커밋 | 증거 확보 완료 |
 | FUNC-01 | 실행 시 메뉴와 종료 기능 제공 | 필수 | `src/game_manager.py` | 메뉴 1~6 선택 확인 | 메뉴 스크린샷 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 증거 확보 완료 |
 | FUNC-02 | 메뉴 입력 공백·빈 값·문자·범위 오류 처리 | 필수 | 입력 메서드 | ` 1 `, Enter, `abc`, `9` 입력 | 메뉴 스크린샷·로그 | 2 | `Feat: 메뉴와 공통 숫자 입력 처리 구현` | 실행 검증 완료 |
 | FUNC-03 | 숫자 입력이 필요한 모든 위치에 공통 검증 적용 | 필수 | 공통 입력 메서드 | 메뉴·정답·추가 정답 오류 직접 입력 | 최종 검증 로그 | 12 | `Fix: 공통 입력 예외 처리 보완` | 구현 완료 |
@@ -36,9 +36,9 @@
 | FUNC-06 | 각 답 입력 후 정답·오답 안내 | 필수 | `src/game_manager.py` | 정답과 오답 각각 입력 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
 | FUNC-07 | 모든 문제 종료 후 정답 수·점수 결과 출력 | 필수 | `src/game_manager.py` | 플레이 완료 화면 | 플레이 스크린샷 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 실행 검증 완료 |
 | FUNC-08 | 퀴즈가 없을 때 플레이 안내 후 메뉴 복귀 | 필수 | `src/game_manager.py` | 빈 목록 상태 직접 실행 | 최종 검증 로그 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 구현 완료 |
-| FUNC-09 | 새 퀴즈의 문제·선택지 4개·정답·힌트 입력 | 필수 | `src/game_manager.py` | 카테고리 없이 새 퀴즈 등록 | 추가 스크린샷 | 7 | `Feat: 퀴즈 등록 기능 구현` | 실행 검증 완료 |
+| FUNC-09 | 새 퀴즈의 문제·선택지 4개·정답·힌트 입력 | 필수 | `src/game_manager.py` | 카테고리 없이 새 퀴즈 등록 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 7 | `Feat: 퀴즈 등록 기능 구현` | 증거 확보 완료 |
 | FUNC-10 | 퀴즈 추가 입력 오류 처리 | 필수 | 입력 메서드 | 빈 문제·선택지, 잘못된 정답 직접 입력 | 최종 검증 로그 | 7, 12 | `Feat: 퀴즈 등록 기능 구현` | 구현 완료 |
-| FUNC-11 | 추가 직후 저장하고 실패 시 메모리 추가 취소 | 필수 | `GameManager.add_quiz()`·`StateManager.save_state()` | 성공 시 JSON 반영, 실패 시 목록 원상 복구 확인 | 추가·JSON 증거 | 7, 11 | `Fix: 퀴즈 추가 저장 실패 처리 개선` | 부분 검증 |
+| FUNC-11 | 추가 직후 저장하고 실패 시 메모리 추가 취소 | 필수 | `GameManager.add_quiz()`·`StateManager.save_state()` | 성공 시 JSON 반영, 실패 시 목록 원상 복구 확인 | 직접 실행 로그·격리 회귀 검사 | 7, 11 | `Fix: 퀴즈 추가 저장 실패 처리 개선` | 실행 검증 완료 |
 | FUNC-12 | 저장된 퀴즈 목록 확인 | 필수 | `src/game_manager.py` | 메뉴에서 목록 출력 | 목록 스크린샷 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 증거 확보 완료 |
 | FUNC-13 | 퀴즈가 없을 때 목록 안내 | 필수 | `src/game_manager.py` | 빈 목록 상태 직접 실행 | 최종 검증 로그 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 구현 완료 |
 | FUNC-14 | 단일 최고 점수 조회 | 필수 | `src/game_manager.py` | 플레이 후 점수 메뉴 확인 | 점수 스크린샷 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 실행 검증 완료 |
@@ -57,12 +57,12 @@
 | DOC-03 | README에 실제·확인용 실행 방법 포함 | 필수 | `README.md` | 그대로 따라 직접 실행 | 최종 검증 로그 | 14, 16 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-04 | README에 기능 목록·파일 구조 포함 | 필수 | `README.md` | 실제 코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
 | DOC-05 | README에 실제·확인용 상태 경로, 역할·스키마·복구 포함 | 필수 | `README.md` | 실제 JSON·코드와 비교 | GitHub README | 14 | `Docs: README와 제출 증거 정리` | 구현 완료 |
-| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/` | Python·Git·VSCode 표시 | `git-log.png` | 1 | `Docs: README와 제출 증거 정리` | 부분 검증 |
-| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 화면 확보 | 필수 | `evidence/screenshots/` | 핵심 화면 확보와 평가 체크리스트 직접 실행 | 기능별 PNG·체크리스트 | 13, 16 | `Docs: README와 제출 증거 정리` | 부분 검증 |
-| EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 구현 중 |
-| EVID-04 | `git log --oneline --graph` 결과 확보 | 필수 | `evidence/screenshots/` | 브랜치·병합·커밋 수 확인 | `git-graph.png` | 16 | `Docs: README와 제출 증거 정리` | 구현 중 |
-| EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/screenshots/`·worklog | 별도 폴더 실습 | `clone-pull.png` | 15 | `Docs: clone 실습 확인 문구 추가` | 예정 |
-| SEC-01 | 저장소·로그·스크린샷에 비밀값 없음 | 필수 | 전체 제출물 | 토큰·키·인증정보 점검 | 최종 체크 결과 | 16 | `Docs: 제출 전 비밀값 점검 기록` | 부분 검증 |
+| EVID-01 | 개발 환경 설정 화면 확보 | 필수 | `evidence/git/`·`evidence/screenshots/` | Python·Git·VSCode 표시 | 초기 환경 화면·VSCode Git 그래프 | 1 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
+| EVID-02 | 최종 메뉴·추가·목록·플레이·삭제·점수 기록 확보 | 필수 | `evidence/logs/` | 기능별 직접 실행과 평가 체크리스트 시연 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 13, 16 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
+| EVID-03 | 재실행 데이터 유지 증거 확보 | 필수 | `evidence/logs/`·`evidence/screenshots/` | 종료 전후 비교 | 점수 원본 로그·추가 퀴즈 화면 | 13 | `Docs: README와 제출 증거 정리` | 부분 검증 |
+| EVID-04 | Git 브랜치·병합 그래프 확보 | 필수 | `evidence/screenshots/` | 최신 main과 기능 브랜치 분기·병합 확인 | [VSCode Git 그래프](../evidence/screenshots/git-log.png) | 16 | `Docs: README와 제출 증거 정리` | 증거 확보 완료 |
+| EVID-05 | clone·push·pull 반영 증거 확보 | 필수 | `evidence/logs/`·worklog | 기존 두 환경의 로컬 reflog 확인 | [clone·push·pull 기록](../evidence/logs/clone-pull.md) | 15 | `Docs: clone 실습 확인 문구 추가` | 증거 확보 완료 |
+| SEC-01 | 저장소·로그·스크린샷에 비밀값 없음 | 필수 | 전체 제출물 | 토큰·키·인증정보 점검 | 최종 체크 결과 | 16 | `Docs: 제출 전 비밀값 점검 기록` | 실행 검증 완료 |
 
 ## 보너스 요구사항
 
@@ -73,8 +73,8 @@
 |---|---|---|---|---|---|---:|---|---|
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 독립 실행해 순서 변화 확인 | 작업 로그·플레이 화면 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 증거 확보 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
-| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 5초 전 3점·후 2점 차감 확인 | 실행 로그·화면 | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 실행 검증 완료, 최신 증거 필요 |
+| BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 5초 전 3점·후 2점 차감 확인 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 증거 확보 완료 |
 | BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `GameManager.delete_quiz()`·`StateManager.save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
 | BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `GameManager.record_game_result()`·`StateManager` JSON 스키마 | 점수 기록 6개 저장 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
-| BONUS-06 | 문제별 10초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 10초, 5초 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 실행 검증 완료, 최신 증거 필요 |
+| BONUS-06 | 문제별 10초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 10초, 5초 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | [최종 게임 직접 실행 기록](../evidence/logs/final-game-verification.md) | 선택 | `9d76c98 Fix: ui 일부 개선 및 힌트 점수 계산 개선` | 증거 확보 완료 |
 | BONUS-07 | 시간 초과 입력이 다음 문제와 충돌하지 않음 | 선택 | `TimedTerminalInput._flush_pending_input()` | Enter 없는 입력 후 시간 초과, 다음 문제 답 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |

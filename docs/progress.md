@@ -3,9 +3,9 @@
 ## 현재 단계
 
 - 브랜치: `main`
-- 현재 기준 커밋: `13ec031 Docs: 리드미 변경 및 단순화`
+- 현재 기준 커밋: `2e52e63 Refactor: 구조 단순화 및 불필요 기능 제거`
 - `main`과 `origin/main`은 작업 시작 시 동기화 상태
-- 현재 작업: 보너스 기능을 유지한 코드 구조 단순화
+- 현재 작업: 관리자 클래스 이름과 기본 퀴즈 생성 시점 정리
 - 상태: 코드와 문서의 로컬 검증 완료, commit 대기
 - 테스트 상태는 `python3 main.py --test`로 선택
 - 플레이 기록은 플레이 시각과 점수만 저장
@@ -13,14 +13,16 @@
 ## 현재 구조
 
 - `Quiz`: 퀴즈 데이터, 형식 검증, 출력과 JSON 변환
-- `QuizGame`: 메뉴, 입력, 퀴즈 진행, 추가·삭제와 점수 처리
+- `GameManager`: 메뉴, 입력, 퀴즈 진행, 추가·삭제와 점수 처리
 - `StateManager`: JSON 저장·불러오기, 검증과 손상 복구
 - `TimedTerminalInput`: 제한 시간, 카운트다운과 자동 힌트 입력
 - `main.py`: 기본 객체 생성과 실행
 
 `main.py`가 실행 옵션에 맞는 상태 경로를 선택하고 `StateManager`를 생성한다.
-`QuizGame`에는 생성된 `StateManager`만 전달한다. `QuizGame`의 `save_state()`와
+`GameManager`에는 생성된 `StateManager`만 전달한다. `GameManager`의 `save_state()`와
 `load_state()`는 현재 상태 전달과 반영을 담당하고 실제 파일 처리는 하지 않는다.
+기본 퀴즈는 정상 상태 파일을 읽을 때 만들지 않고 파일이 없거나 손상됐을 때만
+`StateManager._create_default_state()`에서 생성한다.
 
 ## 구현 완료
 
@@ -56,6 +58,9 @@
 
 ## 이번 단순화 검증
 
+- 정상 상태 로드 시 기본 퀴즈를 생성하지 않음
+- 파일 없음과 손상 복구 시에만 기본 퀴즈를 한 번씩 생성
+- `GameManager` 생성과 실제·테스트 상태 로드
 - Python 파일 7개 구문 검사
 - `python3 main.py --help`의 `--test` 옵션 확인
 - `python3 main.py --test`로 테스트 상태 생성과 정상 종료
@@ -72,7 +77,7 @@
 임시 디렉터리의 독립 상태 파일을 사용해 다음 동작을 확인했다.
 
 - Python 구문과 import 성공
-- `main.py`의 `StateManager`·`QuizGame` 객체 조립과 정상 종료
+- `main.py`의 `StateManager`·`GameManager` 객체 조립과 정상 종료
 - EOF 입력 중단의 안전 종료
 - 파일이 없을 때 기본 퀴즈 5개 저장과 재로드
 - 새 퀴즈 추가 후 재로드
@@ -112,5 +117,5 @@
 
 ## 다음 작업
 
-현재 단순화 변경을 커밋한 뒤, 동료평가 체크리스트에 따라 macOS에서 최종 실행
-증거를 확보한다.
+현재 관리자 이름과 기본 상태 생성 변경을 커밋한 뒤, 동료평가 체크리스트에 따라
+macOS에서 최종 실행 증거를 확보한다.

@@ -9,7 +9,7 @@
 ## 설계 원칙
 
 - `Quiz`는 퀴즈 한 문제의 데이터와 규칙을 담당한다.
-- `QuizGame`은 메뉴와 게임 진행을 담당한다.
+- `GameManager`는 메뉴와 게임 진행을 담당한다.
 - `StateManager`는 파일 상태의 저장·검증·복구를 담당한다.
 - `TimedTerminalInput`은 제한 시간이 있는 터미널 답 입력을 담당한다.
 - `main.py`는 객체를 조립하고 실행만 시작한다.
@@ -18,23 +18,22 @@
 
 한 클래스가 게임 흐름과 JSON 복구를 동시에 처리하지 않도록 역할을 분리한다. 현재
 규모에서는 별도 인터페이스나 저장소 계층을 추가하지 않고, `StateManager` 객체를
-`QuizGame`에 전달하는 단순한 합성 구조를 사용한다.
+`GameManager`에 전달하는 단순한 합성 구조를 사용한다.
 
 ## 전체 구조
 
 ```text
 main.py
-  ├── get_default_quizzes()
   ├── --test 옵션으로 상태 경로 선택
   ├── StateManager
-  └── QuizGame
+  └── GameManager
         ├── list[Quiz]
         ├── best_score
         ├── score_history
         ├── TimedTerminalInput
         └── StateManager
               ├── state.json 또는 state.test.json
-              └── 기본 Quiz 목록
+              └── 파일 없음·손상 시 기본 Quiz 생성
 ```
 
 ## 객체별 책임
@@ -63,7 +62,7 @@ Quiz(
 
 파일: `src/state_manager.py`
 
-- 기본 상태 생성
+- 파일이 없거나 손상됐을 때만 기본 상태 생성
 - UTF-8 JSON 저장과 불러오기
 - 임시 파일 작성 후 활성 파일 교체
 - 퀴즈, 최고 점수와 플레이 기록 스키마 검증
@@ -74,7 +73,7 @@ Quiz(
 `load_state()`는 같은 세 값을 튜플로 반환한다. 파일이 없으면 기본 상태를 만들어
 저장하고, 읽기 오류나 백업 실패가 있으면 기본 상태로 실행한다.
 
-### `QuizGame`
+### `GameManager`
 
 파일: `src/game_manager.py`
 
@@ -87,11 +86,11 @@ Quiz(
 - 현재 퀴즈, 최고 점수와 플레이 기록을 `StateManager`에 저장 위임
 - 불러온 퀴즈, 최고 점수와 플레이 기록을 현재 게임 상태에 반영
 
-`save_state()`와 `load_state()`는 미션에서 저장 책임을 찾기 쉽도록 `QuizGame`에도
+`save_state()`와 `load_state()`는 미션에서 저장 책임을 찾기 쉽도록 `GameManager`에도
 유지한다. 두 메서드는 파일을 직접 처리하지 않고 `StateManager`를 호출한다.
 
-추가·삭제·플레이 기록 저장이 실패하면 `QuizGame`이 변경 전 메모리 상태로
-되돌린다. 파일 처리 성공 여부는 `StateManager`, 게임 변경 롤백은 `QuizGame`이
+추가·삭제·플레이 기록 저장이 실패하면 `GameManager`가 변경 전 메모리 상태로
+되돌린다. 파일 처리 성공 여부는 `StateManager`, 게임 변경 롤백은 `GameManager`가
 담당하는 경계다.
 
 ### `TimedTerminalInput`
@@ -106,14 +105,13 @@ Quiz(
 - TTY가 아닌 입력의 줄 단위 처리
 
 macOS 터미널을 최종 실행 기준으로 사용한다. 제한 시간 입력은 일반 메뉴 입력과
-동작 방식이 다르므로 `QuizGame.read_int()`와 분리한다.
+동작 방식이 다르므로 `GameManager.read_int()`와 분리한다.
 
 ### `main.py`
 
 - 실행 모드에 맞는 상태 경로 선택
-- 기본 퀴즈 생성
 - `StateManager` 생성
-- `QuizGame`에 `StateManager` 전달
+- `GameManager`에 `StateManager` 전달
 - 상태 불러오기 후 게임 실행
 
 ## 주요 기능 흐름
@@ -122,18 +120,18 @@ macOS 터미널을 최종 실행 기준으로 사용한다. 제한 시간 입력
 
 ```text
 main.py
-  → 기본 퀴즈 생성
   → 상태 파일 경로 선택
   → StateManager 생성
-  → QuizGame 생성
-  → QuizGame.load_state()
+  → 파일 없음·손상 시에만 기본 퀴즈 생성
+  → GameManager 생성
+  → GameManager.load_state()
   → StateManager.load_state()
-  → QuizGame.run()
+  → GameManager.run()
 ```
 
 ### 퀴즈 추가·삭제
 
-1. `QuizGame`이 입력을 검증한다.
+1. `GameManager`가 입력을 검증한다.
 2. 메모리의 퀴즈 목록을 변경한다.
 3. 퀴즈 목록, 최고 점수와 플레이 기록으로 `StateManager.save_state()`를 호출한다.
 4. 저장 성공 시 변경을 확정한다.
@@ -184,7 +182,7 @@ main.py
 
 ## 안전 종료
 
-- 메뉴 종료, `KeyboardInterrupt`, `EOFError`는 `QuizGame.safe_exit()`으로 모은다.
+- 메뉴 종료, `KeyboardInterrupt`, `EOFError`는 `GameManager.safe_exit()`으로 모은다.
 - 종료 시 현재 상태 저장을 시도한다.
 - 입력 중단은 traceback 없이 안내하고 종료한다.
 - 저장 실패는 사용자에게 안내하며 메모리와 파일의 불일치를 가능한 범위에서 막는다.

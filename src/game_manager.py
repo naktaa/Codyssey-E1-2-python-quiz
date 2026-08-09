@@ -6,7 +6,7 @@ from .state_manager import ScoreRecord, StateManager
 from .timed_input import TimedTerminalInput
 
 
-class QuizGame:
+class GameManager:
     """터미널 퀴즈 게임의 메뉴와 공통 입력을 관리한다."""
 
     CORRECT_POINTS = 3

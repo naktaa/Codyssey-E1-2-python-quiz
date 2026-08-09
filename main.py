@@ -1,7 +1,6 @@
 import argparse
 
-from src.default_quizzes import get_default_quizzes
-from src.game_manager import QuizGame
+from src.game_manager import GameManager
 from src.state_manager import DEFAULT_STATE_PATH, TEST_STATE_PATH, StateManager
 
 
@@ -19,12 +18,8 @@ def main() -> None:
     if args.test:
         print("[테스트 모드] state.test.json을 사용합니다.")
 
-    default_quizzes = get_default_quizzes()
-    state_manager = StateManager(
-        state_path=state_path,
-        default_quizzes=default_quizzes,
-    )
-    game_manager = QuizGame(state_manager)
+    state_manager = StateManager(state_path)
+    game_manager = GameManager(state_manager)
     game_manager.load_state()
     game_manager.run()
 

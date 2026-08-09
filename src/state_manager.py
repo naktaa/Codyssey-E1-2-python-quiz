@@ -3,6 +3,7 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+from .default_quizzes import get_default_quizzes
 from .quiz import Quiz
 
 
@@ -15,20 +16,19 @@ ScoreRecord = dict[str, str | int]
 class StateManager:
     """퀴즈 게임 상태의 JSON 저장, 검증, 복구를 전담한다."""
 
-    def __init__(self, state_path: Path, default_quizzes: list[Quiz]) -> None:
+    def __init__(self, state_path: Path) -> None:
         self.state_path = state_path
-        self._default_quizzes = list(default_quizzes)
         self._save_enabled = True
 
-    def create_default_state(
+    def _create_default_state(
         self,
     ) -> tuple[
         list[Quiz],
         int | None,
         list[ScoreRecord],
     ]:
-        """기본 퀴즈와 비어 있는 점수 기록으로 새 상태를 만든다."""
-        return list(self._default_quizzes), None, []
+        """필요한 시점에 기본 퀴즈와 비어 있는 점수 기록을 만든다."""
+        return get_default_quizzes(), None, []
 
     def save_state(
         self,
@@ -139,7 +139,7 @@ class StateManager:
         list[ScoreRecord],
     ]:
         """손상 원본을 백업하고 기본 상태 파일을 만든다."""
-        default_state = self.create_default_state()
+        default_state = self._create_default_state()
         backup_path = self.backup_corrupted_state()
         if backup_path is None:
             self._save_enabled = False
@@ -163,7 +163,7 @@ class StateManager:
     ]:
         """상태 파일을 읽어 검증하고 없거나 손상된 경우 안전하게 복구한다."""
         if not self.state_path.exists():
-            default_state = self.create_default_state()
+            default_state = self._create_default_state()
             self.save_state(*default_state)
             return default_state
 
@@ -178,7 +178,7 @@ class StateManager:
             error_message = error.strerror or "알 수 없는 파일 오류"
             print(f"상태 파일을 불러오지 못했습니다: {error_message}")
             print("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
-            return self.create_default_state()
+            return self._create_default_state()
         except (json.JSONDecodeError, UnicodeError, TypeError, ValueError) as error:
             print(f"상태 파일이 손상되었습니다: {error}")
             return self.recover_corrupted_state()

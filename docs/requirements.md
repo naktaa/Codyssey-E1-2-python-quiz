@@ -38,13 +38,13 @@
 | FUNC-08 | 퀴즈가 없을 때 플레이 안내 후 메뉴 복귀 | 필수 | `src/game_manager.py` | 빈 목록 상태 직접 실행 | 최종 검증 로그 | 5 | `Feat: 퀴즈 출제와 결과 출력 구현` | 구현 완료 |
 | FUNC-09 | 새 퀴즈의 문제·선택지 4개·정답·힌트 입력 | 필수 | `src/game_manager.py` | 카테고리 없이 새 퀴즈 등록 | 추가 스크린샷 | 7 | `Feat: 퀴즈 등록 기능 구현` | 실행 검증 완료 |
 | FUNC-10 | 퀴즈 추가 입력 오류 처리 | 필수 | 입력 메서드 | 빈 문제·선택지, 잘못된 정답 직접 입력 | 최종 검증 로그 | 7, 12 | `Feat: 퀴즈 등록 기능 구현` | 구현 완료 |
-| FUNC-11 | 추가 직후 저장하고 실패 시 메모리 추가 취소 | 필수 | `QuizGame.add_quiz()`·`StateManager.save_state()` | 성공 시 JSON 반영, 실패 시 목록 원상 복구 확인 | 추가·JSON 증거 | 7, 11 | `Fix: 퀴즈 추가 저장 실패 처리 개선` | 부분 검증 |
+| FUNC-11 | 추가 직후 저장하고 실패 시 메모리 추가 취소 | 필수 | `GameManager.add_quiz()`·`StateManager.save_state()` | 성공 시 JSON 반영, 실패 시 목록 원상 복구 확인 | 추가·JSON 증거 | 7, 11 | `Fix: 퀴즈 추가 저장 실패 처리 개선` | 부분 검증 |
 | FUNC-12 | 저장된 퀴즈 목록 확인 | 필수 | `src/game_manager.py` | 메뉴에서 목록 출력 | 목록 스크린샷 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 증거 확보 완료 |
 | FUNC-13 | 퀴즈가 없을 때 목록 안내 | 필수 | `src/game_manager.py` | 빈 목록 상태 직접 실행 | 최종 검증 로그 | 8 | `Feat: 퀴즈 목록 조회 기능 구현` | 구현 완료 |
 | FUNC-14 | 단일 최고 점수 조회 | 필수 | `src/game_manager.py` | 플레이 후 점수 메뉴 확인 | 점수 스크린샷 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 실행 검증 완료 |
 | FUNC-15 | 매 플레이 결과와 최고 점수 비교·갱신 | 필수 | `src/game_manager.py` | 낮은 점수·높은 점수 순서로 직접 확인 | 플레이·점수 증거 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 실행 검증 완료 |
 | FUNC-16 | 아직 플레이 전 상태 안내 | 필수 | `src/game_manager.py` | 초기 상태 점수 확인 | 최종 검증 로그 | 9 | `Feat: 최고 점수 계산과 조회 구현` | 증거 확보 완료 |
-| TECH-04 | `QuizGame` 클래스 정의 | 필수 | `src/game_manager.py` | 인스턴스 생성과 실행 | 코드·실행 로그 | 10 | `Refactor: QuizGame 기능별 책임 정리` | 실행 검증 완료 |
+| TECH-04 | `GameManager` 클래스 정의 | 필수 | `src/game_manager.py` | 인스턴스 생성과 실행 | 코드·실행 로그 | 10 | `Refactor: GameManager 기능별 책임 정리` | 실행 검증 완료 |
 | TECH-05 | 메뉴·플레이·추가·목록·점수 메서드 분리와 저장 책임 위임 | 필수 | `src/game_manager.py`·`src/state_manager.py` | 코드 구조와 위임 흐름 검토 | 최종 코드 | 10 | `Refactor: 상태 관리 책임 분리` | 구현 완료 |
 | DATA-02 | 루트 `state.json`에 퀴즈와 단일 최고 점수 저장 | 필수 | `state.json`·`StateManager.save_state()` | `best_score`와 카테고리 없는 퀴즈 확인 | persistence 스크린샷·로그 | 11 | `Feat: state.json 저장과 불러오기 구현` | 실행 검증 완료 |
 | DATA-03 | UTF-8로 JSON 읽기·쓰기 | 필수 | `src/state_manager.py` | 한글 퀴즈 저장 후 재실행 | persistence 증거 | 11 | `Feat: state.json 저장과 불러오기 구현` | 구현 완료 |
@@ -74,7 +74,7 @@
 | BONUS-01 | 문제 순서 랜덤 출제 | 선택 | `play_quizzes()`·`random.sample()` | 여러 번 독립 실행해 순서 변화 확인 | 작업 로그·플레이 화면 | 선택 | `Feat: 퀴즈 랜덤 출제 추가` | 증거 확보 완료 |
 | BONUS-02 | 전체 상식 문제 중 풀이 수 선택 | 선택 | `play_quizzes()` | 1~전체 범위 직접 확인 | 실행 로그 | 선택 | `Feat: 풀이 문제 수 선택 추가` | 실행 검증 완료 |
 | BONUS-03 | 자동 힌트와 점수 차감 | 선택 | `Quiz.hint`·`TimedTerminalInput`·`play_quizzes()` | 빈 힌트 줄의 제자리 공개와 10초 전·후 3점·1점 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 부분 증거 확보, 평가 확인 예정 |
-| BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `QuizGame.delete_quiz()`·`StateManager.save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
-| BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `QuizGame.record_game_result()`·`StateManager` JSON 스키마 | 점수 기록 6개 저장 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
+| BONUS-04 | 전체 목록에서 퀴즈 삭제 및 파일 반영 | 선택 | `GameManager.delete_quiz()`·`StateManager.save_state()` | 번호 선택, `y/n` 삭제·취소 후 재실행 | 실행 로그 | 선택 | `Feat: 퀴즈 삭제 기능 추가` | 실행 검증 완료 |
+| BONUS-05 | 날짜·시간 포함 점수 기록 히스토리 | 선택 | `GameManager.record_game_result()`·`StateManager` JSON 스키마 | 점수 기록 6개 저장 후 최근 5개와 재실행 확인 | 실행 로그 | 선택 | `Feat: 점수 기록 히스토리 추가` | 구현 완료 |
 | BONUS-06 | 문제별 20초 제한 시간과 1초 카운트다운 | 선택 | `src/timed_input.py` | 시작 20초, 힌트·입력·하단 오류 줄 배치와 문제별 초기화 확인 | 실행 로그·화면 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 증거 확보 완료 |
 | BONUS-07 | 시간 초과 입력이 다음 문제와 충돌하지 않음 | 선택 | `TimedTerminalInput._flush_pending_input()` | Enter 없는 입력 후 시간 초과, 다음 문제 답 확인 | 실행 로그 | 선택 | `Feat: 제한 시간과 자동 힌트 기능 실험` | 실행 검증 완료, 최종 증거 필요 |

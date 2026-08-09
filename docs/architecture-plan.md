@@ -25,7 +25,7 @@
 ```text
 main.py
   ├── get_default_quizzes()
-  ├── get_state_path()
+  ├── --test 옵션으로 상태 경로 선택
   ├── StateManager
   └── QuizGame
         ├── list[Quiz]
@@ -48,7 +48,7 @@ Quiz(
     question: str,
     choices: list[str],
     answer: int,
-    hint: str | None,
+    hint: str,
 )
 ```
 
@@ -63,13 +63,10 @@ Quiz(
 
 파일: `src/state_manager.py`
 
-- `QUIZ_STATE_MODE`에 따른 실제·테스트 상태 경로 선택
 - 기본 상태 생성
 - UTF-8 JSON 저장과 불러오기
 - 임시 파일 작성 후 활성 파일 교체
 - 퀴즈, 최고 점수와 플레이 기록 스키마 검증
-- 이전 카테고리별 최고 점수를 단일 점수로 이전
-- 기존 기본 문제의 누락된 힌트 복원
 - 손상된 원본 백업과 기본 상태 복구
 - 원본 보호가 필요한 경우 해당 실행의 저장 비활성화
 
@@ -157,13 +154,13 @@ main.py
 - 최고 점수는 문제 수로 정규화하지 않고 실제 획득 점수만 비교한다.
 - 문제 수가 많을수록 획득 가능한 최대 점수가 높다.
 - 높은 최고 점수를 목표로 할 때 많은 문제를 선택하도록 유도하는 의도된 정책이다.
-- 플레이 기록에는 획득 점수와 해당 게임의 만점을 함께 저장한다.
+- 플레이 기록에는 플레이 시각과 획득 점수만 저장한다.
 
 ## 상태 파일
 
 - 실제 실행: 프로젝트 루트의 `state.json`
 - 테스트 실행: 프로젝트 루트의 `state.test.json`
-- 선택 환경 변수: `QUIZ_STATE_MODE=real|test`
+- 테스트 실행 옵션: `python3 main.py --test`
 - 인코딩: UTF-8
 - JSON 출력: `ensure_ascii=False`, 들여쓰기 2칸
 - 손상 백업: `상태파일명.corrupt-YYYYMMDD-HHMMSS-ffffff`
@@ -172,7 +169,12 @@ main.py
 {
   "quizzes": [],
   "best_score": null,
-  "score_history": []
+  "score_history": [
+    {
+      "played_at": "2026-08-09 15:30",
+      "score": 7
+    }
+  ]
 }
 ```
 

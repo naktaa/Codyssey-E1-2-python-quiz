@@ -8,7 +8,7 @@ class Quiz:
     question: str
     choices: list[str]
     answer: int
-    hint: str | None = None
+    hint: str
 
     def __post_init__(self) -> None:
         """객체 생성 시 문자열을 정리하고 퀴즈 형식을 검증한다."""
@@ -26,8 +26,7 @@ class Quiz:
         if type(self.answer) is not int or not 1 <= self.answer <= 4:
             raise ValueError("정답 번호는 1부터 4 사이의 정수여야 합니다.")
 
-        if self.hint is not None:
-            self.hint = self._normalize_text(self.hint, "힌트")
+        self.hint = self._normalize_text(self.hint, "힌트")
 
     @staticmethod
     def _normalize_text(value: object, field_name: str) -> str:
@@ -62,7 +61,7 @@ class Quiz:
         if not isinstance(data, dict):
             raise ValueError("퀴즈 데이터는 딕셔너리여야 합니다.")
 
-        required_fields = ("question", "choices", "answer")
+        required_fields = ("question", "choices", "answer", "hint")
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             missing = ", ".join(missing_fields)
@@ -72,5 +71,5 @@ class Quiz:
             question=data["question"],
             choices=data["choices"],
             answer=data["answer"],
-            hint=data.get("hint"),
+            hint=data["hint"],
         )

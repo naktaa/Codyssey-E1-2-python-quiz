@@ -2,7 +2,7 @@ import random
 from datetime import datetime
 
 from .quiz import Quiz
-from .state_manager import StateManager, get_state_path
+from .state_manager import ScoreRecord, StateManager
 from .timed_input import TimedTerminalInput
 
 
@@ -21,19 +21,11 @@ class QuizGame:
         6: "종료",
     }
 
-    def __init__(
-        self,
-        quizzes: list[Quiz] | None = None,
-        state_manager: StateManager | None = None,
-    ) -> None:
-        # 전달받은 목록을 복사해 게임 밖의 목록 변경과 상태를 분리한다.
-        self.quizzes = list(quizzes) if quizzes is not None else []
+    def __init__(self, state_manager: StateManager) -> None:
+        self.quizzes: list[Quiz] = []
         self.best_score: int | None = None
-        self.score_history: list[dict[str, str | int]] = []
-        self.state_manager = state_manager or StateManager(
-            state_path=get_state_path(),
-            default_quizzes=self.quizzes,
-        )
+        self.score_history: list[ScoreRecord] = []
+        self.state_manager = state_manager
         self.timed_input = TimedTerminalInput()
 
     def show_menu(self) -> None:
@@ -156,28 +148,15 @@ class QuizGame:
             print("퀴즈 삭제를 취소했습니다.")
             return False
 
-        previous_score = self.best_score
         self.quizzes.pop(quiz_index)
-        if not self.quizzes:
-            self.best_score = None
 
         if self.save_state():
             print("퀴즈를 삭제하고 저장했습니다.")
             return True
 
         self.quizzes.insert(quiz_index, selected_quiz)
-        self.best_score = previous_score
         print("파일에 저장하지 못해 퀴즈 삭제를 취소했습니다.")
         return False
-
-    def select_quiz_count(self, total_count: int) -> int:
-        """전체 상식 퀴즈에서 풀 문제 수를 입력받는다."""
-        print(f"\n등록된 상식 퀴즈는 총 {total_count}문제입니다.")
-        return self.read_int(
-            f"풀 문제 수를 입력하세요(1~{total_count}): ",
-            1,
-            total_count,
-        )
 
     def play_quizzes(self) -> int | None:
         """전체 상식 퀴즈를 자동 힌트가 있는 제한 시간 방식으로 출제한다."""
@@ -185,7 +164,13 @@ class QuizGame:
             print("등록된 퀴즈가 없습니다.")
             return None
 
-        quiz_count = self.select_quiz_count(len(self.quizzes))
+        total_quizzes = len(self.quizzes)
+        print(f"\n등록된 상식 퀴즈는 총 {total_quizzes}문제입니다.")
+        quiz_count = self.read_int(
+            f"풀 문제 수를 입력하세요(1~{total_quizzes}): ",
+            1,
+            total_quizzes,
+        )
         # 원본 저장 순서는 유지하고 이번 플레이의 출제 목록만 무작위로 만든다.
         selected_quizzes = random.sample(self.quizzes, k=quiz_count)
         correct_count = 0
@@ -220,46 +205,24 @@ class QuizGame:
                 )
 
         total_count = len(selected_quizzes)
-        max_score = total_count * self.CORRECT_POINTS
         print("\n=== 퀴즈 결과 ===")
         print(f"정답 수: {correct_count}/{total_count}")
         print(f"자동 힌트 공개: {hint_count}회")
         print(f"점수: {score}점")
-        if self.record_game_result(
-            score=score,
-            max_score=max_score,
-            correct_count=correct_count,
-            total_count=total_count,
-            hint_count=hint_count,
-        ):
+        if self.record_game_result(score):
             print(f"새로운 최고 점수: {score}점")
         return score
 
-    def update_best_score(self, score: int) -> bool:
-        """기존 기록보다 높은 점수로 단일 최고 점수를 갱신한다."""
-        if self.best_score is None or score > self.best_score:
-            self.best_score = score
-            return True
-        return False
-
-    def record_game_result(
-        self,
-        score: int,
-        max_score: int,
-        correct_count: int,
-        total_count: int,
-        hint_count: int,
-    ) -> bool:
+    def record_game_result(self, score: int) -> bool:
         """완료한 플레이를 기록하고 최고 점수와 함께 한 번 저장한다."""
         previous_score = self.best_score
-        is_new_best = self.update_best_score(score)
-        record: dict[str, str | int] = {
+        is_new_best = self.best_score is None or score > self.best_score
+        if is_new_best:
+            self.best_score = score
+
+        record: ScoreRecord = {
             "played_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "score": score,
-            "max_score": max_score,
-            "correct_count": correct_count,
-            "total_count": total_count,
-            "hint_count": hint_count,
         }
         self.score_history.append(record)
 
@@ -271,8 +234,8 @@ class QuizGame:
         print("플레이 기록을 저장하지 못했습니다.")
         return False
 
-    def show_best_score(self) -> None:
-        """상식 퀴즈의 최고 점수 또는 기록 없음 상태를 출력한다."""
+    def show_score_records(self) -> None:
+        """최고 점수와 최근 플레이 기록을 함께 출력한다."""
         print("\n=== 최고 점수 ===")
         score_text = (
             "기록 없음"
@@ -281,30 +244,17 @@ class QuizGame:
         )
         print(score_text)
 
-    def show_score_history(self) -> None:
-        """플레이 시각 기준 최근 기록을 최대 5개 출력한다."""
         print("\n=== 최근 플레이 기록 ===")
         if not self.score_history:
             print("플레이 기록이 없습니다.")
             return
 
-        indexed_history = enumerate(self.score_history)
-        recent_history = sorted(
-            indexed_history,
-            key=lambda item: (item[1]["played_at"], item[0]),
-            reverse=True,
-        )[:5]
-        for number, (_, record) in enumerate(recent_history, start=1):
+        recent_history = self.score_history[-5:]
+        recent_history.reverse()
+        for number, record in enumerate(recent_history, start=1):
             print(
-                f"{number}. {record['played_at']}  {record['score']}점  "
-                f"정답 {record['correct_count']}/{record['total_count']}  "
-                f"자동 힌트 {record['hint_count']}회"
+                f"{number}. {record['played_at']}  {record['score']}점"
             )
-
-    def show_score_records(self) -> None:
-        """최고 점수와 최근 플레이 기록을 함께 출력한다."""
-        self.show_best_score()
-        self.show_score_history()
 
     def safe_exit(self, interrupted: bool = False) -> None:
         """정상 종료와 입력 중단 종료의 안내를 한곳에서 처리한다."""

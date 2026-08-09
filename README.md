@@ -52,7 +52,7 @@
 | `main.py` | 필요한 객체를 생성하고 게임을 시작하는 진입점 |
 | `src/quiz.py` | `Quiz` 데이터 검증, 문제 출력, 정답 확인과 JSON 변환 |
 | `src/game_manager.py` | 메뉴, 입력, 퀴즈 진행, 문제 추가·삭제와 점수 처리 |
-| `src/state_manager.py` | 상태 경로 선택, JSON 저장·검증·이전·백업과 복구 |
+| `src/state_manager.py` | JSON 저장·검증·백업과 손상 파일 복구 |
 | `src/timed_input.py` | 제한 시간 답 입력, 카운트다운과 자동 힌트 처리 |
 | `src/default_quizzes.py` | 상태 파일이 없거나 손상됐을 때 사용할 기본 문제 제공 |
 
@@ -94,11 +94,11 @@ python3 main.py
 기능을 확인하려면 테스트 모드로 실행한다.
 
 ```zsh
-QUIZ_STATE_MODE=test python3 main.py
+python3 main.py --test
 ```
 
-테스트 모드는 Git에서 제외된 `state.test.json`만 읽고 쓴다. 환경 변수를 지정하지
-않거나 `QUIZ_STATE_MODE=real`로 지정하면 `state.json`을 사용한다.
+`--test` 옵션은 Git에서 제외된 `state.test.json`만 읽고 쓴다. 옵션 없이 실행하면
+실제 데이터인 `state.json`을 사용한다.
 
 ## 주요 기능
 
@@ -126,7 +126,7 @@ QUIZ_STATE_MODE=test python3 main.py
 | 자동 힌트 | 10초가 지나면 문제별 힌트를 자동으로 공개한다. |
 | 차등 점수 | 힌트 공개 전 정답은 3점, 공개 후 정답은 1점이다. |
 | 퀴즈 삭제 | 문제를 선택하고 `y/n`으로 확인한 뒤 즉시 저장한다. |
-| 플레이 기록 | 전체 기록을 저장하고 최근 5개를 최신순으로 보여준다. |
+| 플레이 기록 | 플레이 시각과 점수를 저장하고 최근 5개를 최신순으로 보여준다. |
 
 ## 전체 게임 흐름
 
@@ -185,11 +185,7 @@ JSON은 UTF-8, 한글 유지, 들여쓰기 2칸 형식으로 저장한다.
   "score_history": [
     {
       "played_at": "2026-08-05 21:34",
-      "score": 4,
-      "max_score": 6,
-      "correct_count": 2,
-      "total_count": 2,
-      "hint_count": 1
+      "score": 4
     }
   ]
 }
@@ -197,7 +193,7 @@ JSON은 UTF-8, 한글 유지, 들여쓰기 2칸 형식으로 저장한다.
 
 - `quizzes`: 퀴즈 객체 목록
 - `best_score`: 아직 플레이하지 않았으면 `null`, 이후 가장 높은 실제 획득 점수
-- `score_history`: 완료한 모든 플레이 기록
+- `score_history`: 완료한 플레이의 시각과 점수 기록
 - `answer`: 1부터 4 사이의 정답 번호
 - `played_at`: `YYYY-MM-DD HH:MM` 형식의 로컬 시각
 
@@ -213,7 +209,7 @@ JSON은 UTF-8, 한글 유지, 들여쓰기 2칸 형식으로 저장한다.
 
 ## 기능 체크리스트
 
-실제 `state.json`을 보호하려면 `QUIZ_STATE_MODE=test python3 main.py`로 실행한다.
+실제 `state.json`을 보호하려면 `python3 main.py --test`로 실행한다.
 
 - [ ] 실행 직후 메뉴 1~6이 정상적으로 표시된다.
 - [ ] 메뉴에 빈 값, 문자와 범위 밖 숫자를 입력하면 다시 입력받는다.

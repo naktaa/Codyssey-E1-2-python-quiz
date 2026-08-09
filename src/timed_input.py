@@ -22,8 +22,8 @@ class TimedAnswerResult:
 class TimedTerminalInput:
     """macOS 터미널에서 카운트다운과 자동 힌트를 표시하며 답을 받는다."""
 
-    TIME_LIMIT_SECONDS = 20.0
-    HINT_DELAY_SECONDS = 10.0
+    TIME_LIMIT_SECONDS = 10.0
+    HINT_DELAY_SECONDS = 5.0
 
     CLEAR_LINE = "\033[2K"
     CURSOR_UP_ONE_LINE = "\033[1A"

@@ -21,9 +21,9 @@
 python3 main.py 실행
   → argparse로 --test 옵션 확인
   → Path로 사용할 상태 파일 경로 선택
-  → 기본 Quiz 객체 5개 생성
-  → StateManager와 QuizGame 객체 생성
+  → StateManager와 GameManager 객체 생성
   → JSON 상태 불러오기와 검증
+  → 파일이 없거나 손상됐을 때만 기본 Quiz 객체 5개 생성
   → 메뉴 반복
   → 선택한 기능 실행
   → 변경된 경우 JSON 저장
@@ -45,8 +45,7 @@ python3 main.py --test
 ```python
 import argparse
 
-from src.default_quizzes import get_default_quizzes
-from src.game_manager import QuizGame
+from src.game_manager import GameManager
 from src.state_manager import DEFAULT_STATE_PATH, TEST_STATE_PATH, StateManager
 ```
 
@@ -62,10 +61,10 @@ import argparse
 설치가 필요하지 않다.
 
 ```python
-from src.game_manager import QuizGame
+from src.game_manager import GameManager
 ```
 
-프로젝트의 `src/game_manager.py` 모듈에서 `QuizGame` 클래스만 가져온다.
+프로젝트의 `src/game_manager.py` 모듈에서 `GameManager` 클래스만 가져온다.
 
 현재 프로젝트의 import는 두 종류로 구분할 수 있다.
 
@@ -92,12 +91,8 @@ def main() -> None:
 
 ```python
 state_path = TEST_STATE_PATH if args.test else DEFAULT_STATE_PATH
-default_quizzes = get_default_quizzes()
-state_manager = StateManager(
-    state_path=state_path,
-    default_quizzes=default_quizzes,
-)
-game_manager = QuizGame(state_manager)
+state_manager = StateManager(state_path)
+game_manager = GameManager(state_manager)
 game_manager.load_state()
 game_manager.run()
 ```
@@ -297,6 +292,8 @@ def get_default_quizzes() -> list[Quiz]:
 ```
 
 `get_default_quizzes()`는 `Quiz` 객체 다섯 개가 들어 있는 리스트를 반환한다.
+정상 상태 파일을 읽을 때는 호출하지 않고 파일이 없거나 손상됐을 때만
+`StateManager`가 호출한다.
 
 ```python
 list[Quiz]
@@ -500,35 +497,29 @@ self.choices = normalized_choices
 
 ## 7. 객체 조립과 `__init__()`
 
-`main()`은 `StateManager`와 `QuizGame`을 다음과 같이 만든다.
+`main()`은 `StateManager`와 `GameManager`를 다음과 같이 만든다.
 
 ```python
-state_manager = StateManager(
-    state_path=state_path,
-    default_quizzes=default_quizzes,
-)
-game_manager = QuizGame(state_manager)
+state_manager = StateManager(state_path)
+game_manager = GameManager(state_manager)
 ```
 
 ### `StateManager.__init__()`
 
 ```python
-def __init__(self, state_path: Path, default_quizzes: list[Quiz]) -> None:
+def __init__(self, state_path: Path) -> None:
     self.state_path = state_path
-    self._default_quizzes = list(default_quizzes)
     self._save_enabled = True
 ```
 
 `__init__()`은 객체를 만들 때 자동 실행되는 초기화 메서드다.
 
 - `state_path`: 읽고 쓸 JSON 파일 위치
-- `_default_quizzes`: 파일이 없거나 손상됐을 때 사용할 기본 문제
 - `_save_enabled`: 현재 실행에서 저장할 수 있는지 나타내는 `bool`
 
-`list(default_quizzes)`는 전달받은 리스트의 얕은 복사본을 만든다. 목록을 추가하거나
-삭제하는 동작이 외부 리스트와 동시에 일어나는 것을 막는다.
+기본 퀴즈를 속성으로 계속 보관하지 않고 실제로 필요한 복구 시점에 새로 만든다.
 
-### 단순해진 `QuizGame.__init__()`
+### 단순해진 `GameManager.__init__()`
 
 ```python
 def __init__(self, state_manager: StateManager) -> None:
@@ -539,14 +530,14 @@ def __init__(self, state_manager: StateManager) -> None:
     self.timed_input = TimedTerminalInput()
 ```
 
-`QuizGame`은 빈 상태로 생성된 후 JSON에서 실제 상태를 불러온다.
+`GameManager`는 빈 상태로 생성된 후 JSON에서 실제 상태를 불러온다.
 
 ```text
 기본 데이터와 파일 관리 → StateManager
-현재 게임 진행과 상태 사용 → QuizGame
+현재 게임 진행과 상태 사용 → GameManager
 ```
 
-`QuizGame`이 JSON을 직접 처리하지 않고 전달받은 `StateManager`에 요청하는 구조다.
+`GameManager`가 JSON을 직접 처리하지 않고 전달받은 `StateManager`에 요청하는 구조다.
 상속을 사용하지 않고 한 객체가 다른 객체를 포함해 사용하는 객체 합성이다.
 
 ---
@@ -591,7 +582,7 @@ game_manager.run()
 
 먼저 저장된 상태를 복원하고, 복원이 끝난 뒤 메뉴를 시작한다.
 
-### `QuizGame.load_state()`
+### `GameManager.load_state()`
 
 ```python
 (
@@ -608,7 +599,7 @@ game_manager.run()
 
 ```python
 if not self.state_path.exists():
-    default_state = self.create_default_state()
+    default_state = self._create_default_state()
     self.save_state(*default_state)
     return default_state
 ```
@@ -618,7 +609,7 @@ if not self.state_path.exists():
 기본 상태는 다음 세 값이다.
 
 ```python
-return list(self._default_quizzes), None, []
+return get_default_quizzes(), None, []
 ```
 
 - 기본 퀴즈 목록
@@ -1106,8 +1097,8 @@ answer_result = self.timed_input.read_answer(quiz.hint)
 기능을 동시에 처리하기 어렵다.
 
 - 1초마다 남은 시간 갱신
-- 10초 뒤 자동 힌트 공개
-- 20초 뒤 자동 시간 초과
+- 5초 뒤 자동 힌트 공개
+- 10초 뒤 자동 시간 초과
 
 그래서 제한시간 입력은 별도 `TimedTerminalInput` 클래스가 담당한다.
 
@@ -1124,7 +1115,7 @@ class TimedAnswerResult:
 - `hint_shown`: 힌트가 공개됐는지 나타내는 `bool`
 - `frozen=True`: 생성 후 결과 속성을 변경할 수 없음
 
-`QuizGame`은 제한시간 내부 구현 전체를 알 필요 없이 다음 두 값만 사용한다.
+`GameManager`는 제한시간 내부 구현 전체를 알 필요 없이 다음 두 값만 사용한다.
 
 ```python
 answer_result.answer
@@ -1135,8 +1126,8 @@ answer_result.hint_shown
 
 ```python
 started_at = time.monotonic()
-hint_at = started_at + 10
-deadline = started_at + 20
+hint_at = started_at + 5
+deadline = started_at + 10
 ```
 
 `datetime.now()`는 현재 날짜와 시각을 기록할 때 사용한다. `time.monotonic()`은
@@ -1202,30 +1193,32 @@ if answer_result.answer is None:
 
 `continue`는 현재 문제의 남은 코드를 건너뛰고 `for` 반복의 다음 문제로 이동한다.
 
-정답이면 힌트 공개 여부에 따라 점수를 정한다.
+정답이면 기본 점수에서 힌트 사용에 따른 차감 점수를 계산한다.
 
 ```python
-earned_points = (
-    self.HINT_CORRECT_POINTS
+hint_penalty = (
+    self.HINT_PENALTY
     if answer_result.hint_shown
-    else self.CORRECT_POINTS
+    else 0
 )
+earned_points = self.CORRECT_POINTS - hint_penalty
 ```
 
 일반 조건문으로 풀면 다음과 같다.
 
 ```python
 if answer_result.hint_shown:
-    earned_points = 1
+    hint_penalty = 2
 else:
-    earned_points = 3
+    hint_penalty = 0
+earned_points = 3 - hint_penalty
 ```
 
 점수는 클래스 상수로 정의되어 있다.
 
 ```python
 CORRECT_POINTS = 3
-HINT_CORRECT_POINTS = 1
+HINT_PENALTY = 2
 ```
 
 숫자의 의미를 이름으로 보여주고 점수 규칙을 한곳에서 수정하기 위해서다.
@@ -1381,14 +1374,14 @@ def safe_exit(self, interrupted: bool = False) -> None:
 | 클래스 | 보관하는 데이터 | 주요 동작 |
 |---|---|---|
 | `Quiz` | 문제, 선택지, 정답, 힌트 | 검증, 출력, 정답 판정, 딕셔너리 변환 |
-| `QuizGame` | 현재 퀴즈, 최고 점수, 기록 | 메뉴, 입력, 플레이, 추가·삭제, 점수 처리 |
-| `StateManager` | 파일 경로, 기본 퀴즈, 저장 가능 상태 | JSON 저장·검증·백업·복구 |
+| `GameManager` | 현재 퀴즈, 최고 점수, 기록 | 메뉴, 입력, 플레이, 추가·삭제, 점수 처리 |
+| `StateManager` | 파일 경로, 저장 가능 상태 | JSON 저장·검증·백업·복구 |
 | `TimedTerminalInput` | 제한시간과 힌트 시각 설정 | 카운트다운, 답 입력, 자동 힌트, 시간 초과 |
 
 이 분리는 한 클래스가 모든 기능을 처리하지 않게 한다.
 
 ```text
-QuizGame ──저장 요청──> StateManager ──읽기/쓰기──> JSON 파일
+GameManager ──저장 요청──> StateManager ──읽기/쓰기──> JSON 파일
     │
     ├──여러 Quiz 객체 관리
     └──답 입력 요청──> TimedTerminalInput
@@ -1425,7 +1418,7 @@ QuizGame ──저장 요청──> StateManager ──읽기/쓰기──> JSON
 3. `Path(__file__).resolve().parents[1]`로 프로젝트 루트를 찾는 이유를 설명한다.
 4. 기본 퀴즈 함수가 새 `Quiz` 객체 목록을 반환한다고 설명한다.
 5. `Quiz`가 `dataclass`이고 `__post_init__()`에서 형식을 검증한다고 설명한다.
-6. `StateManager`와 `QuizGame`을 만들고 상태를 불러오는 순서를 설명한다.
+6. `StateManager`와 `GameManager`를 만들고 상태를 불러오는 순서를 설명한다.
 7. JSON 딕셔너리를 `Quiz.from_dict()`로 객체로 복원하는 과정을 설명한다.
 8. 파일 없음과 손상 JSON을 `try-except`로 처리하는 방식을 설명한다.
 9. `while True` 메뉴와 `read_int()` 공통 입력 검증을 설명한다.
@@ -1465,5 +1458,5 @@ QuizGame ──저장 요청──> StateManager ──읽기/쓰기──> JSON
 ## 한 문장 정리
 
 이 프로그램은 `main.py`에서 실행 옵션과 객체를 준비하고, `StateManager`가 JSON을
-`Quiz` 객체로 복원한 뒤, `QuizGame`이 메뉴와 게임을 진행하며, 상태가 바뀔 때마다
+`Quiz` 객체로 복원한 뒤, `GameManager`가 메뉴와 게임을 진행하며, 상태가 바뀔 때마다
 다시 JSON으로 안전하게 저장하는 구조다.

@@ -10,7 +10,9 @@ class GameManager:
     """터미널 퀴즈 게임의 메뉴와 공통 입력을 관리한다."""
 
     CORRECT_POINTS = 3
-    HINT_CORRECT_POINTS = 1
+    HINT_PENALTY = 2
+    SECTION_LINE = "=" * 40
+    DETAIL_LINE = "-" * 40
 
     MENU_ITEMS = {
         1: "퀴즈 풀기",
@@ -28,11 +30,25 @@ class GameManager:
         self.state_manager = state_manager
         self.timed_input = TimedTerminalInput()
 
-    def show_menu(self) -> None:
+    def show_section(self, title: str) -> None:
+        """메뉴와 기능의 시작 위치를 같은 형식으로 구분한다."""
         print("")
-        print("=== 상식 퀴즈 게임 ===")
+        print(self.SECTION_LINE)
+        print(title)
+        print(self.SECTION_LINE)
+
+    def show_menu(self) -> None:
+        self.show_section("상식 퀴즈 게임")
+        score_text = (
+            "기록 없음"
+            if self.best_score is None
+            else f"{self.best_score}점"
+        )
+        print(f"등록 문제: {len(self.quizzes)}개 | 최고 점수: {score_text}")
+        print(self.DETAIL_LINE)
         for number, label in self.MENU_ITEMS.items():
             print(f"{number}. {label}")
+        print(self.DETAIL_LINE)
 
     def read_int(self, prompt: str, minimum: int, maximum: int) -> int:
         """지정된 범위의 정수가 입력될 때까지 다시 입력받는다."""
@@ -91,7 +107,7 @@ class GameManager:
 
     def add_quiz(self) -> bool:
         """새 퀴즈를 추가하고 저장하며 실패하면 메모리 변경을 되돌린다."""
-        print("\n=== 퀴즈 추가 ===")
+        self.show_section("퀴즈 추가")
         question = self.read_nonempty("문제: ")
         choices = [
             self.read_nonempty(f"선택지 {number}: ")
@@ -118,23 +134,26 @@ class GameManager:
 
     def list_quizzes(self) -> None:
         """저장된 상식 퀴즈의 번호와 질문을 연속해서 출력한다."""
+        self.show_section("퀴즈 목록")
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
             return
 
-        print("\n=== 퀴즈 목록 ===")
+        print(f"총 {len(self.quizzes)}개의 문제가 등록되어 있습니다.")
+        print(self.DETAIL_LINE)
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"{number}. {quiz.question}")
 
     def delete_quiz(self) -> bool:
         """선택한 퀴즈를 확인 후 삭제하고 상태 파일에 저장한다."""
+        self.show_section("퀴즈 삭제")
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
             return False
 
-        print("\n=== 퀴즈 삭제 ===")
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"{number}. {quiz.question}")
+        print(self.DETAIL_LINE)
 
         choice = self.read_int(
             "삭제할 문제 번호를 입력하세요: ",
@@ -160,12 +179,13 @@ class GameManager:
 
     def play_quizzes(self) -> int | None:
         """전체 상식 퀴즈를 자동 힌트가 있는 제한 시간 방식으로 출제한다."""
+        self.show_section("퀴즈 풀기")
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
             return None
 
         total_quizzes = len(self.quizzes)
-        print(f"\n등록된 상식 퀴즈는 총 {total_quizzes}문제입니다.")
+        print(f"등록된 상식 퀴즈는 총 {total_quizzes}문제입니다.")
         quiz_count = self.read_int(
             f"풀 문제 수를 입력하세요(1~{total_quizzes}): ",
             1,
@@ -176,11 +196,19 @@ class GameManager:
         correct_count = 0
         hint_count = 0
         score = 0
+        total_count = len(selected_quizzes)
 
-        print("\n=== 상식 퀴즈 ===")
+        self.show_section("상식 퀴즈 시작")
+        print(f"선택한 문제: {total_count}개")
+        print(
+            f"제한 시간: {self.timed_input.time_limit_seconds:g}초 | "
+            f"힌트: {self.timed_input.hint_delay_seconds:g}초 후 공개"
+        )
         for number, quiz in enumerate(selected_quizzes, start=1):
             print("")
-            quiz.display(number=number)
+            print(self.DETAIL_LINE)
+            print(f"[문제 {number}/{total_count}]")
+            quiz.display()
             answer_result = self.timed_input.read_answer(quiz.hint)
             if answer_result.hint_shown:
                 hint_count += 1
@@ -191,11 +219,12 @@ class GameManager:
 
             if quiz.is_correct(answer_result.answer):
                 correct_count += 1
-                earned_points = (
-                    self.HINT_CORRECT_POINTS
+                hint_penalty = (
+                    self.HINT_PENALTY
                     if answer_result.hint_shown
-                    else self.CORRECT_POINTS
+                    else 0
                 )
+                earned_points = self.CORRECT_POINTS - hint_penalty
                 score += earned_points
                 print(f"정답입니다! {earned_points}점을 획득했습니다.")
             else:
@@ -204,11 +233,10 @@ class GameManager:
                     f"오답입니다. 정답은 {quiz.answer}번 {correct_choice}입니다."
                 )
 
-        total_count = len(selected_quizzes)
-        print("\n=== 퀴즈 결과 ===")
+        self.show_section("퀴즈 결과")
         print(f"정답 수: {correct_count}/{total_count}")
-        print(f"자동 힌트 공개: {hint_count}회")
-        print(f"점수: {score}점")
+        print(f"힌트 사용 횟수: {hint_count}회")
+        print(f"최종 점수: {score}점")
         if self.record_game_result(score):
             print(f"새로운 최고 점수: {score}점")
         return score
@@ -236,15 +264,16 @@ class GameManager:
 
     def show_score_records(self) -> None:
         """최고 점수와 최근 플레이 기록을 함께 출력한다."""
-        print("\n=== 최고 점수 ===")
+        self.show_section("최고 점수와 기록")
         score_text = (
             "기록 없음"
             if self.best_score is None
             else f"{self.best_score}점"
         )
-        print(score_text)
+        print(f"최고 점수: {score_text}")
 
-        print("\n=== 최근 플레이 기록 ===")
+        print(self.DETAIL_LINE)
+        print("최근 플레이 기록")
         if not self.score_history:
             print("플레이 기록이 없습니다.")
             return
@@ -269,7 +298,7 @@ class GameManager:
         try:
             while True:
                 self.show_menu()
-                choice = self.read_int("메뉴를 선택하세요: ", 1, 6)
+                choice = self.read_int("메뉴 선택(1~6): ", 1, 6)
 
                 if choice == 6:
                     self.safe_exit()

@@ -3,10 +3,10 @@
 ## 현재 단계
 
 - 브랜치: `main`
-- 현재 기준 커밋: `2e52e63 Refactor: 구조 단순화 및 불필요 기능 제거`
+- 현재 기준 커밋: `e22a61a ㅁ`
 - `main`과 `origin/main`은 작업 시작 시 동기화 상태
-- 현재 작업: 관리자 클래스 이름과 기본 퀴즈 생성 시점 정리
-- 상태: 코드와 문서의 로컬 검증 완료, commit 대기
+- 현재 작업: 게임 화면, 힌트 점수 차감과 시연 시간 개선
+- 상태: 코드·문서 로컬 검증 완료, 사용자 직접 확인과 commit 대기
 - 테스트 상태는 `python3 main.py --test`로 선택
 - 플레이 기록은 플레이 시각과 점수만 저장
 
@@ -41,9 +41,10 @@
 
 ### 추가 기능
 
-- 문제별 20초 제한 시간과 1초 카운트다운
-- 10초 후 문제별 자동 힌트
-- 힌트 전 3점, 힌트 후 1점 차등 점수
+- 문제별 10초 제한 시간과 1초 카운트다운
+- 5초 후 문제별 자동 힌트
+- 정답 3점에서 힌트 사용 시 2점을 차감하는 점수
+- 메뉴·기능별 공통 구분선과 문제 진행 수 표시
 - 문제 수 선택과 중복 없는 무작위 출제
 - 퀴즈 삭제와 저장 실패 롤백
 - 전체 플레이 기록 저장과 최근 5개 표시
@@ -97,8 +98,9 @@
 ## 기존 확보 증거
 
 - 초기 Git 설정: `evidence/git/git-verification.md`, `evidence/git/git-log.png`
-- 현재 메뉴: `evidence/screenshots/main-menu.png`
-- 제한 시간·자동 힌트: `evidence/screenshots/game-play.png`
+- 개선 전 메뉴: `evidence/screenshots/main-menu.png`
+- 개선 전 20초 제한 시간·10초 자동 힌트:
+  `evidence/screenshots/game-play.png`
 - 안전 종료: `evidence/logs/safe-exit.md`
 - 최고 점수 재실행: `evidence/logs/persistence-restart.md`
 - 손상 JSON 복구: `evidence/logs/json-recovery.md`
@@ -111,11 +113,12 @@
 - macOS zsh에서 README 동료평가 순서 최종 실행
 - 현재 구조에서 추가 퀴즈와 점수의 종료·재실행 영속성 원본 증거
 - 추가·목록·플레이 결과·점수 화면 최종 확보
+- 메뉴 구분과 10초·5초 규칙을 반영한 현재 화면 확보
 - 최종 Git 그래프 확보
 - 별도 디렉터리 clone·push 후 기존 작업 폴더 pull 반영 증거
 - 전체 제출물 비밀값 최종 점검
 
 ## 다음 작업
 
-현재 관리자 이름과 기본 상태 생성 변경을 커밋한 뒤, 동료평가 체크리스트에 따라
-macOS에서 최종 실행 증거를 확보한다.
+현재 화면·점수·시간 변경을 사용자가 macOS에서 직접 확인한 뒤 문서와 증거를
+최종 정리한다.

@@ -13,6 +13,7 @@ class GameManager:
     HINT_PENALTY = 2
     SECTION_LINE = "=" * 40
     DETAIL_LINE = "-" * 40
+    SECTION_GAP_LINES = 3
 
     MENU_ITEMS = {
         1: "퀴즈 풀기",
@@ -32,10 +33,15 @@ class GameManager:
 
     def show_section(self, title: str) -> None:
         """메뉴와 기능의 시작 위치를 같은 형식으로 구분한다."""
-        print("")
+        self.show_section_gap()
         print(self.SECTION_LINE)
         print(title)
         print(self.SECTION_LINE)
+
+    def show_section_gap(self) -> None:
+        """메뉴, 기능, 문제 사이에 일정한 빈 줄을 출력한다."""
+        for _ in range(self.SECTION_GAP_LINES):
+            print("")
 
     def show_menu(self) -> None:
         self.show_section("상식 퀴즈 게임")
@@ -205,7 +211,7 @@ class GameManager:
             f"힌트: {self.timed_input.hint_delay_seconds:g}초 후 공개"
         )
         for number, quiz in enumerate(selected_quizzes, start=1):
-            print("")
+            self.show_section_gap()
             print(self.DETAIL_LINE)
             print(f"[문제 {number}/{total_count}]")
             quiz.display()

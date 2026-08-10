@@ -238,16 +238,17 @@ JSON은 UTF-8, 한글 유지, 들여쓰기 4칸 형식으로 저장한다.
 |---|---|
 | 초기 환경과 Git 설정 | [Git 확인 기록](evidence/git/git-verification.md) |
 | 개선 전 20초·10초 플레이 | [게임 화면](evidence/screenshots/game-play.png) |
-| 화면 변경 전 메뉴·추가·목록·플레이·점수·삭제 | [2026-08-09 직접 실행 기록](evidence/logs/final-game-verification.md) |
-| 최신 현재 점수 표시 | [문제별 현재 점수 회귀 검사](evidence/logs/current-score-regression.md) |
+| macOS 메뉴·추가·목록·플레이·점수·삭제 | [2026-08-09 직접 실행 기록](evidence/logs/final-game-verification.md) |
+| 최종 현재 점수 표시·메뉴·저장 회귀 | [문제별 현재 점수 회귀 검사](evidence/logs/current-score-regression.md) |
 | 안전 종료 | [안전 종료 기록](evidence/logs/safe-exit.md) |
 | 최고 점수 재실행 유지 | [영속성 기록](evidence/logs/persistence-restart.md) |
 | 손상 JSON 백업·복구 | [복구 기록](evidence/logs/json-recovery.md) |
 | 최종 브랜치·병합 그래프 | [VSCode Git 그래프](evidence/screenshots/git-log.png) |
 | clone·push·pull 사용 | [로컬 reflog 확인 기록](evidence/logs/clone-pull.md) |
 
-현재 기능은 긴 터미널 실행 과정을 화면별로 나누는 대신 기능별 직접 실행 로그로
-정리했다. 평가 시에는 위 기능 체크리스트 순서로 실제 게임을 함께 실행한다.
+긴 터미널 실행 과정은 기능별 직접 실행 로그로 정리했다. macOS 직접 실행
+기록과 현재 점수·메뉴·저장 회귀 검사를 함께 최종 기능 증거로 사용한다.
+브랜치 분기·병합은 기존 VSCode Git 그래프로 확인한다.
 
 개발 과정과 요구사항별 검증 상태는 다음 문서에서 확인할 수 있다.
 

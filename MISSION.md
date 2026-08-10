@@ -7,7 +7,7 @@ Python 기본 문법, 객체 지향 구조, JSON 파일 입출력, 예외 처리
 ## 2. 필수 최종 산출물
 
 - Python 3.10 이상에서 실행되는 콘솔 퀴즈 게임
-- 최소 2개 클래스: `Quiz`, `QuizGame`
+- 최소 2개 클래스: `Quiz`, `GameManager`
 - 직접 작성한 동일 주제 퀴즈 5개 이상
 - 프로젝트 루트의 UTF-8 `state.json`
 - 퀴즈와 최고 점수의 재실행 후 유지
@@ -37,7 +37,7 @@ Python 기본 문법, 객체 지향 구조, JSON 파일 입출력, 예외 처리
 codyssey-e1-2-quiz-game/
 ├── main.py
 ├── quiz.py
-├── quiz_game.py
+├── game_manager.py
 ├── default_quizzes.py
 ├── state.json
 ├── README.md
@@ -67,7 +67,7 @@ codyssey-e1-2-quiz-game/
 - JSON 저장용 딕셔너리 변환
 - 딕셔너리에서 객체 복원
 
-### `QuizGame`
+### `GameManager`
 
 - 퀴즈 목록과 최고 점수 관리
 - 메뉴 루프
@@ -78,7 +78,7 @@ codyssey-e1-2-quiz-game/
 
 ### 진입점
 
-- `main.py`는 `QuizGame` 생성과 실행만 담당하도록 유지한다.
+- `main.py`는 `GameManager` 생성과 실행만 담당하도록 유지한다.
 
 ## 6. 데이터 스키마 권장안
 
@@ -110,7 +110,7 @@ codyssey-e1-2-quiz-game/
 7. 퀴즈 추가
 8. 퀴즈 목록
 9. 점수 계산·갱신
-10. `QuizGame` 책임 정리
+10. `GameManager` 책임 정리
 11. `state.json` 저장·불러오기와 오류 복구
 12. 통합 예외 처리와 안전 종료
 13. 전체 실행 검증 및 증거 수집
@@ -138,7 +138,7 @@ codyssey-e1-2-quiz-game/
 9. `Feat: 최고 점수 계산과 조회 구현`
 10. `Feat: state.json 저장과 불러오기 구현`
 11. `Fix: 입력 중단과 손상 파일 복구 처리`
-12. `Refactor: QuizGame 기능별 책임 정리`
+12. `Refactor: GameManager 기능별 책임 정리`
 13. `Test: 필수 기능과 데이터 영속성 검증`
 14. `Docs: README와 제출 증거 정리`
 15. `Docs: clone 실습 확인 문구 추가` — 복제 디렉터리에서 수행 가능

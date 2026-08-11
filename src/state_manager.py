@@ -18,6 +18,7 @@ class StateManager:
 
     def __init__(self, state_path: Path) -> None:
         self.state_path = state_path
+        self.backup_path = state_path.with_name(f"{state_path.name}.bak")
         self._save_enabled = True
 
     def _create_default_state(
@@ -36,7 +37,7 @@ class StateManager:
         best_score: int | None,
         score_history: list[ScoreRecord],
     ) -> bool:
-        """게임 상태를 임시 JSON 파일에 쓴 뒤 활성 파일로 교체한다."""
+        """이전 정상 상태를 백업하고 새 상태를 임시 파일로 교체한다."""
         if not self._save_enabled:
             print("원본 상태 파일을 보호하기 위해 저장하지 않았습니다.")
             return False
@@ -52,6 +53,9 @@ class StateManager:
             with temp_path.open("w", encoding="utf-8", newline="\n") as file:
                 json.dump(state_data, file, ensure_ascii=False, indent=4)
                 file.write("\n")
+            if not self.backup_valid_state():
+                temp_path.unlink(missing_ok=True)
+                return False
             temp_path.replace(self.state_path)
         except OSError as error:
             try:
@@ -60,6 +64,53 @@ class StateManager:
                 pass
             error_message = error.strerror or "알 수 없는 파일 오류"
             print(f"상태 파일을 저장하지 못했습니다: {error_message}")
+            return False
+
+        return True
+
+    def load_valid_state_file(
+        self,
+        path: Path,
+    ) -> tuple[
+        list[Quiz],
+        int | None,
+        list[ScoreRecord],
+    ]:
+        """지정한 JSON 파일을 읽고 전체 상태 스키마를 검증한다."""
+        with path.open("r", encoding="utf-8") as file:
+            state_data = json.load(file)
+        return self.validate_state_data(state_data)
+
+    def backup_valid_state(self) -> bool:
+        """교체 전 활성 파일이 정상이면 한 세대 복구 백업으로 보관한다."""
+        if not self.state_path.exists():
+            return True
+
+        try:
+            self.load_valid_state_file(self.state_path)
+        except (json.JSONDecodeError, UnicodeError, TypeError, ValueError):
+            # 손상된 활성 파일로 마지막 정상 백업을 덮어쓰지 않는다.
+            return True
+        except OSError as error:
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            print(f"기존 상태 파일을 확인하지 못했습니다: {error_message}")
+            print("이전 상태를 보호하기 위해 새 상태를 저장하지 않았습니다.")
+            return False
+
+        backup_temp_path = self.backup_path.with_name(
+            f"{self.backup_path.name}.tmp"
+        )
+        try:
+            shutil.copy2(self.state_path, backup_temp_path)
+            backup_temp_path.replace(self.backup_path)
+        except OSError as error:
+            try:
+                backup_temp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            print(f"정상 상태 백업을 만들지 못했습니다: {error_message}")
+            print("이전 상태를 보호하기 위해 새 상태를 저장하지 않았습니다.")
             return False
 
         return True
@@ -137,6 +188,25 @@ class StateManager:
             return None
         return backup_path
 
+    def load_recovery_backup(
+        self,
+    ) -> tuple[
+        list[Quiz],
+        int | None,
+        list[ScoreRecord],
+    ] | None:
+        """마지막 정상 백업을 검증해 반환하고 사용할 수 없으면 안내한다."""
+        try:
+            return self.load_valid_state_file(self.backup_path)
+        except FileNotFoundError:
+            print("사용할 수 있는 마지막 정상 백업이 없습니다.")
+        except OSError as error:
+            error_message = error.strerror or "알 수 없는 파일 오류"
+            print(f"마지막 정상 백업을 불러오지 못했습니다: {error_message}")
+        except (json.JSONDecodeError, UnicodeError, TypeError, ValueError) as error:
+            print(f"마지막 정상 백업도 손상되었습니다: {error}")
+        return None
+
     def recover_corrupted_state(
         self,
     ) -> tuple[
@@ -144,15 +214,31 @@ class StateManager:
         int | None,
         list[ScoreRecord],
     ]:
-        """손상 원본을 백업하고 기본 상태 파일을 만든다."""
-        default_state = self._create_default_state()
+        """손상 원본을 보존하고 마지막 정상 백업이나 기본 상태를 복구한다."""
         backup_path = self.backup_corrupted_state()
+
         if backup_path is None:
             self._save_enabled = False
+            recovered_state = self.load_recovery_backup()
+            if recovered_state is not None:
+                print("마지막 정상 백업 데이터로 실행합니다.")
+                print("손상 원본 보호를 위해 이번 실행에서는 저장하지 않습니다.")
+                return recovered_state
+
             print("원본 보호를 위해 이번 실행에서는 상태를 저장하지 않습니다.")
-            return default_state
+            return self._create_default_state()
 
         print(f"손상된 상태 파일을 백업했습니다: {backup_path.name}")
+        recovered_state = self.load_recovery_backup()
+        if recovered_state is not None:
+            if self.save_state(*recovered_state):
+                print(f"마지막 정상 백업으로 복구했습니다: {self.backup_path.name}")
+            else:
+                self._save_enabled = False
+                print("백업 데이터로 실행하지만 상태 파일은 복구하지 못했습니다.")
+            return recovered_state
+
+        default_state = self._create_default_state()
         if self.save_state(*default_state):
             print("기본 데이터로 상태 파일을 복구했습니다.")
             return default_state
@@ -174,10 +260,8 @@ class StateManager:
             return default_state
 
         try:
-            with self.state_path.open("r", encoding="utf-8") as file:
-                state_data = json.load(file)
             loaded_quizzes, loaded_score, loaded_history = (
-                self.validate_state_data(state_data)
+                self.load_valid_state_file(self.state_path)
             )
         except OSError as error:
             self._save_enabled = False
